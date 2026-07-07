@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>高等進学塾 高2東京医進数学「技 完全攻略への道」</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="header-banner">
+      <img src="kotoishin-waza-logo.png" alt="高等進学塾 高2東京医進数学「技」完全攻略への道" class="header-image">
+    </header>
+
+    <div class="content">
+      <div class="unit-select-wrap">
+        <select id="unit-select" class="chapter-badge" onchange="switchUnit(this.value)"></select>
+      </div>
+
+      <div class="tab-buttons">
+        <button id="tab-all" class="tab-btn active" onclick="showView('all')">すべての問題</button>
+        <button id="tab-homework" class="tab-btn" onclick="showView('homework')">提出必須問題のみ</button>
+        <button id="tab-review" class="tab-btn" onclick="showView('review')">要復習のみ</button>
+        <button id="tab-unpracticed" class="tab-btn" onclick="showView('unpracticed')">未演習のみ</button>
+        <button id="tab-mistakes" class="tab-btn" onclick="showView('mistakes')">ミス一覧</button>
+        <button id="tab-checkpoints" class="tab-btn" onclick="showView('checkpoints')">Check Point一覧</button>
+      </div>
+
+      <div class="legend">
+        <span class="legend-label">評価基準：</span>
+        <span><b class="legend-A">A</b>=楽勝で解けた</span>
+        <span><b class="legend-B">B</b>=ミスはあったがほぼ解けてた</span>
+        <span><b class="legend-C">C</b>=ヒントを見ることにより解けた</span>
+        <span><b class="legend-D">D</b>=あんまり解けなかった</span>
+        <span><b class="legend-E">E</b>=全然解けなかった</span>
+      </div>
+
+      <div id="problem-list"></div>
+      <div id="mistake-list" style="display:none;"></div>
+      <div id="checkpoint-list" style="display:none;"></div>
+    </div>
+  </div>
+
+  <div id="mistake-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-card">
+      <h3>ミス内容を選択してください（複数選択可）</h3>
+      <div id="mistake-chip-list" class="mistake-chip-list"></div>
+      <input type="text" id="mistake-other-input" class="mistake-other-input" placeholder="その他（自由記載）">
+      <div class="modal-buttons">
+        <button class="modal-cancel" onclick="closeMistakeModal()">キャンセル</button>
+        <button class="modal-save" onclick="confirmMistakeModal()">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
