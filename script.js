@@ -105,18 +105,22 @@ function getCurrentUnit() {
 }
 
 // 現在の単元（講）が参照している技の問題データを取り出す。
-// 問題そのもの（レベル・Check Point文）はproblemBankに、宿題必須かどうかは講ごとのhomeworkNumbersに持たせている。
+// 問題そのもの（レベル・Check Point文）はproblemBankに、宿題必須かどうか（クラス別）は講ごとのhomeworkNumbersSSSA/SBCTに持たせている。
 function getProblems() {
   const unit = getCurrentUnit();
   const chapter = problemBank[unit.chapterRef];
   const byNumber = {};
   chapter.problems.forEach(p => { byNumber[p.number] = p; });
 
+  const referenceNumbers = unit.referenceNumbers || [];
+
   return unit.problemNumbers.map(number => ({
     number: number,
     level: byNumber[number].level,
     checkPoint: byNumber[number].checkPoint,
-    homeworkRequired: unit.homeworkNumbers.includes(number),
+    homeworkRequiredSSSA: unit.homeworkNumbersSSSA.includes(number),
+    homeworkRequiredSBCT: unit.homeworkNumbersSBCT.includes(number),
+    isReference: referenceNumbers.includes(number),
   }));
 }
 
@@ -152,19 +156,10 @@ function needsReview(history) {
   return flagged;
 }
 
-// 現在の表示フィルタ（'all' / 'homework' / 'review' / 'unpracticed'）
+// 現在の表示フィルタ（'all' / 'homeworkSSSA' / 'homeworkSBCT' / 'review' / 'unpracticed'）
 let currentFilter = "all";
 // 現在表示中のタブ（フィルタ4種 + 'mistakes' + 'checkpoints'）。単元切り替え時の再描画に使う
 let currentView = "all";
-
-// 学期を切り替える
-function switchTerm(index) {
-  currentTermIndex = Number(index);
-  currentUnitIndex = 0;
-  saveAppState();
-  renderUnitSelector();
-  showView(currentView);
-}
 
 // 単元（章・講）を切り替える
 function switchUnit(index) {
@@ -210,7 +205,6 @@ function showMainScreen() {
   document.getElementById("cover-screen").style.display = "none";
   document.getElementById("main-screen").style.display = "block";
 
-  renderTermSelector();
   renderUnitSelector();
   showView(currentView);
 }
@@ -250,15 +244,6 @@ function startFromCover() {
 
   saveAppState();
   showMainScreen();
-}
-
-// 学期選択メニューを作る
-function renderTermSelector() {
-  const select = document.getElementById("term-select");
-  select.innerHTML = terms
-    .map((term, index) => `<option value="${index}">${term.title}</option>`)
-    .join("");
-  select.value = currentTermIndex;
 }
 
 // 単元選択メニューを作る
@@ -407,7 +392,8 @@ function getFilteredProblems() {
   return getProblems()
     .map((problem, index) => ({ problem, index, history: getHistory(problem, records) }))
     .filter(({ problem, history }) => {
-      if (currentFilter === "homework") return problem.homeworkRequired;
+      if (currentFilter === "homeworkSSSA") return problem.homeworkRequiredSSSA;
+      if (currentFilter === "homeworkSBCT") return problem.homeworkRequiredSBCT;
       if (currentFilter === "review") return needsReview(history);
       if (currentFilter === "unpracticed") return history.length === 0;
       return true; // 'all'
@@ -476,7 +462,9 @@ function renderProblems() {
       <div class="problem-header">
         <span class="problem-number">${problem.number}</span>
         <span class="problem-level">Lv${problem.level}</span>
-        ${problem.homeworkRequired ? '<span class="homework-badge">宿題必須</span>' : ""}
+        ${problem.homeworkRequiredSSSA ? '<span class="homework-badge homework-badge-sssa">必須(SS/SA)</span>' : ""}
+        ${problem.homeworkRequiredSBCT ? '<span class="homework-badge homework-badge-sbct">必須(SBC/T)</span>' : ""}
+        ${problem.isReference ? '<span class="reference-badge">参考</span>' : ""}
         ${needsReview(history) ? '<span class="review-badge">要復習</span>' : ""}
       </div>
       <div class="eval-buttons">${evalButtons}</div>
@@ -583,7 +571,7 @@ function showView(view) {
     renderCheckpoints();
   } else {
     problemList.style.display = "block";
-    currentFilter = view; // 'all' / 'homework' / 'review' / 'unpracticed'
+    currentFilter = view; // 'all' / 'homeworkSSSA' / 'homeworkSBCT' / 'review' / 'unpracticed'
     renderProblems();
   }
 }

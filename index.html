@@ -40,32 +40,17 @@
   </div>
 
   <div id="main-screen" class="app" style="display:none;">
-    <header class="header-banner">
-      <img src="kotoishin-waza-logo.png" alt="高等進学塾 高2東京医進数学「技」完全攻略への道" class="header-image">
-    </header>
-
     <div class="content">
-      <button type="button" class="back-to-cover-btn" onclick="showCoverScreen()">＜ 最初のページへ</button>
-
-      <div class="term-select-wrap">
-        <select id="term-select" class="term-badge" onchange="switchTerm(this.value)"></select>
-      </div>
+      <button type="button" class="back-to-cover-btn" onclick="showCoverScreen()">＜ ホーム画面へ</button>
 
       <div class="unit-select-wrap">
         <select id="unit-select" class="chapter-badge" onchange="switchUnit(this.value)"></select>
       </div>
 
-      <div class="backup-buttons">
-        <button onclick="exportRecords()">📤 履歴を書き出す</button>
-        <label class="backup-import-label">
-          📥 履歴を読み込む
-          <input type="file" accept="application/json" onchange="importRecords(event)">
-        </label>
-      </div>
-
       <div class="tab-buttons">
         <button id="tab-all" class="tab-btn active" onclick="showView('all')">すべての問題</button>
-        <button id="tab-homework" class="tab-btn" onclick="showView('homework')">提出必須問題のみ</button>
+        <button id="tab-homeworkSSSA" class="tab-btn" onclick="showView('homeworkSSSA')">提出必須のみ(SS/SA)</button>
+        <button id="tab-homeworkSBCT" class="tab-btn" onclick="showView('homeworkSBCT')">提出必須のみ(SBC/T)</button>
         <button id="tab-review" class="tab-btn" onclick="showView('review')">要復習のみ</button>
         <button id="tab-unpracticed" class="tab-btn" onclick="showView('unpracticed')">未演習のみ</button>
         <button id="tab-mistakes" class="tab-btn" onclick="showView('mistakes')">ミス一覧</button>
