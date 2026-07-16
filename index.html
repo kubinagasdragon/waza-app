@@ -4,17 +4,63 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>高等進学塾 高2東京医進数学「技 完全攻略への道」</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app">
+  <div id="cover-screen" class="cover-screen">
+    <div class="cover-glow"></div>
+
+    <div class="cover-logo">
+      <div class="cover-subtitle">高等進学塾　高2東京医進数学</div>
+      <div class="cover-title"><span class="cover-title-gold">「<span class="cover-title-accent">技</span>」</span>完全攻略への道</div>
+    </div>
+
+    <div class="cover-term-label">学期を選択</div>
+    <div class="cover-term-buttons" id="cover-term-buttons"></div>
+
+    <button type="button" id="cover-start-btn" class="cover-start-btn disabled" onclick="startFromCover()">START</button>
+
+    <div class="cover-howto">このアプリの使い方 <span class="cover-howto-note">（重要）</span></div>
+
+    <div class="cover-device-block">
+      <div class="cover-device-heading">▼ 機種変更する方へ ▼</div>
+      <div class="cover-device-buttons">
+        <button type="button" onclick="exportRecords()">📤 履歴を書き出す</button>
+        <label class="backup-import-label">
+          📥 履歴を読み込む
+          <input type="file" accept="application/json" onchange="importRecords(event)">
+        </label>
+      </div>
+    </div>
+
+    <div class="cover-version">アプリ ver 1.0.0</div>
+    <div class="cover-version">© 高等進学塾／designed by Masahiro Imura</div>
+  </div>
+
+  <div id="main-screen" class="app" style="display:none;">
     <header class="header-banner">
       <img src="kotoishin-waza-logo.png" alt="高等進学塾 高2東京医進数学「技」完全攻略への道" class="header-image">
     </header>
 
     <div class="content">
+      <button type="button" class="back-to-cover-btn" onclick="showCoverScreen()">＜ 最初のページへ</button>
+
+      <div class="term-select-wrap">
+        <select id="term-select" class="term-badge" onchange="switchTerm(this.value)"></select>
+      </div>
+
       <div class="unit-select-wrap">
         <select id="unit-select" class="chapter-badge" onchange="switchUnit(this.value)"></select>
+      </div>
+
+      <div class="backup-buttons">
+        <button onclick="exportRecords()">📤 履歴を書き出す</button>
+        <label class="backup-import-label">
+          📥 履歴を読み込む
+          <input type="file" accept="application/json" onchange="importRecords(event)">
+        </label>
       </div>
 
       <div class="tab-buttons">
