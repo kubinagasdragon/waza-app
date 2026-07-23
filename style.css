@@ -247,6 +247,35 @@ button {
   padding: 1px 3px 0;
 }
 
+/* Check Point文中のベクトル表記（例: OA, b）を上に矢印付きの線で表す */
+.vec {
+  position: relative;
+  display: inline-block;
+  padding-top: 0.6em;
+  margin: 0 1px;
+}
+
+.vec::before {
+  content: "";
+  position: absolute;
+  top: 0.2em;
+  left: 0;
+  right: 0.32em;
+  border-top: 1.3px solid currentColor;
+}
+
+.vec::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -0.05em;
+  width: 0;
+  height: 0;
+  border-top: 0.22em solid transparent;
+  border-bottom: 0.22em solid transparent;
+  border-left: 0.32em solid currentColor;
+}
+
 .problem-item {
   background: #1b2536;
   border-radius: 10px;
