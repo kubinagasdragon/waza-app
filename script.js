@@ -1,3 +1,18 @@
+// アプリの更新履歴（コミット・プッシュのたびに先頭に新しいバージョンを追加する）
+const CHANGELOG = [
+  {
+    version: "1.0.1",
+    date: "2026-07-28",
+    changes: ["演習履歴を削除できる機能を追加（🗑️ボタンから間違えて入力した記録を削除できます）"],
+  },
+  {
+    version: "1.0.0",
+    date: "2026-07-23",
+    changes: ["プレリリース版を公開"],
+  },
+];
+const APP_VERSION = CHANGELOG[0].version;
+
 // よくあるミスの選択肢（Bを選んだときにタップで選べる）
 const MISTAKE_CATEGORIES = [
   "四則演算（単純な四則演算）",
@@ -190,6 +205,7 @@ function showCoverScreen() {
   document.getElementById("main-screen").style.display = "none";
 
   renderCoverTermButtons();
+  document.getElementById("cover-version-text").textContent = APP_VERSION;
 
   const saved = loadAppState();
   if (saved && terms[saved.termIndex]) {
@@ -325,6 +341,17 @@ function saveEditedMistake(problem, i) {
   renderProblems();
 }
 
+// 履歴の記録を削除する（間違えて入力した記録の削除用。元に戻せないので確認を挟む）
+function deleteHistoryEntry(problem, i) {
+  if (!confirm("この記録を削除しますか？（元に戻せません）")) return;
+
+  const records = loadRecords();
+  const key = recordKey(problem);
+  records[key].splice(i, 1);
+  saveRecords(records);
+  renderProblems();
+}
+
 // ミス選択モーダル：どの問題に対する記録かを一時的に覚えておく
 let pendingMistakeProblem = null;
 let selectedMistakeCategories = new Set();
@@ -340,6 +367,31 @@ function openMistakeModal(problem) {
 function closeMistakeModal() {
   document.getElementById("mistake-modal").style.display = "none";
   pendingMistakeProblem = null;
+}
+
+// 更新履歴モーダルの表示・非表示
+function openChangelogModal() {
+  const list = document.getElementById("changelog-list");
+  list.innerHTML = CHANGELOG
+    .map(
+      entry => `
+      <div class="changelog-entry">
+        <div class="changelog-entry-header">
+          <span class="changelog-version">ver ${entry.version}</span>
+          <span class="changelog-date">${entry.date}</span>
+        </div>
+        <ul class="changelog-changes">
+          ${entry.changes.map(c => `<li>${c}</li>`).join("")}
+        </ul>
+      </div>
+    `
+    )
+    .join("");
+  document.getElementById("changelog-modal").style.display = "flex";
+}
+
+function closeChangelogModal() {
+  document.getElementById("changelog-modal").style.display = "none";
 }
 
 function renderMistakeChips() {
@@ -440,6 +492,7 @@ function renderProblems() {
           <span class="history-eval">${r.evaluation}</span>
           <span class="history-date">${formatDate(r.date)}</span>
           <button class="history-edit-btn" onclick="toggleDateEdit('${key}', ${i})">✏️</button>
+          <button class="history-delete-btn" onclick="deleteHistoryEntry(getProblems()[${index}], ${i})">🗑️</button>
           <div class="date-edit-form" id="edit-${key}-${i}">
             <input type="datetime-local" id="input-${key}-${i}" value="${toDatetimeLocalValue(r.date)}">
             <button onclick="saveEditedDate(getProblems()[${index}], ${i})">保存</button>

@@ -35,7 +35,7 @@
       </div>
     </div>
 
-    <div class="cover-version">アプリ ver 1.0.0</div>
+    <button type="button" class="cover-version cover-version-btn" onclick="openChangelogModal()">アプリ ver <span id="cover-version-text"></span>　更新履歴 ＞</button>
     <div class="cover-version">© 高等進学塾／designed by Masahiro Imura</div>
   </div>
 
@@ -80,6 +80,16 @@
       <div class="modal-buttons">
         <button class="modal-cancel" onclick="closeMistakeModal()">キャンセル</button>
         <button class="modal-save" onclick="confirmMistakeModal()">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="changelog-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-card">
+      <h3>更新履歴</h3>
+      <div id="changelog-list"></div>
+      <div class="modal-buttons">
+        <button class="modal-cancel" onclick="closeChangelogModal()">閉じる</button>
       </div>
     </div>
   </div>
