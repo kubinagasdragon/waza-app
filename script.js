@@ -1,6 +1,15 @@
 // アプリの更新履歴（コミット・プッシュのたびに先頭に新しいバージョンを追加する）
 const CHANGELOG = [
   {
+    version: "1.0.7",
+    date: "2026-07-30",
+    changes: [
+      "ホーム画面に「学習到達度チェッカー 📊」を追加",
+      "学期別に各章の到達度を棒グラフで確認できる機能を追加",
+      "使い方ガイドラインに学習到達度チェッカーの説明を追加",
+    ],
+  },
+  {
     version: "1.0.6",
     date: "2026-07-29",
     changes: [
@@ -236,6 +245,7 @@ function showCoverScreen() {
   document.getElementById("cover-screen").style.display = "flex";
   document.getElementById("main-screen").style.display = "none";
   document.getElementById("guide-screen").style.display = "none";
+  document.getElementById("achievement-screen").style.display = "none";
 
   renderCoverTermButtons();
   document.getElementById("cover-version-text").textContent = APP_VERSION;
@@ -254,6 +264,7 @@ function showMainScreen() {
   document.getElementById("cover-screen").style.display = "none";
   document.getElementById("main-screen").style.display = "block";
   document.getElementById("guide-screen").style.display = "none";
+  document.getElementById("achievement-screen").style.display = "none";
 
   renderUnitSelector();
   showView(currentView);
@@ -264,6 +275,7 @@ function showGuideScreen() {
   document.getElementById("cover-screen").style.display = "none";
   document.getElementById("main-screen").style.display = "none";
   document.getElementById("guide-screen").style.display = "block";
+  document.getElementById("achievement-screen").style.display = "none";
   window.scrollTo(0, 0);
 }
 
@@ -304,6 +316,151 @@ async function checkForUpdate() {
   } catch (e) {
     statusEl.textContent = "確認できませんでした。通信環境をご確認のうえ、もう一度お試しください。";
   }
+}
+
+// ===== 学習到達度チェッカー =====
+
+// 章の表示順（技1A 第1〜8章 → 技2B 第1〜9章）。problemBankのキーそのもの。
+const ACHIEVEMENT_CHAPTER_ORDER = [
+  "1a-1", "1a-2", "1a-3", "1a-4", "1a-5", "1a-6", "1a-7", "1a-8",
+  "2b-1", "2b-2", "2b-3", "2b-4", "2b-5", "2b-6", "2b-7", "2b-8", "2b-9",
+];
+
+// 学期ごとの対象レベル・除外章（演習画面の講構成とは独立に、章単位で判定する）
+const ACHIEVEMENT_TERM_CONFIG = {
+  term1: { label: "1学期", levelLabel: "Lv.1–2", maxLevel: 2, excludeChapters: ["1a-1", "1a-4", "2b-1", "2b-8"] },
+  term2: { label: "2学期", levelLabel: "Lv.1–3", maxLevel: 3, excludeChapters: ["2b-8"] },
+  term3: { label: "3学期以降", levelLabel: "Lv.1–4", maxLevel: 4, excludeChapters: [] },
+};
+
+const ACHIEVEMENT_TERM_STORAGE_KEY = "achievementSelectedTerm";
+const VALID_ACHIEVEMENT_TERMS = ["term1", "term2", "term3"];
+const ACHIEVEMENT_EVAL_SCORES = { A: 5, B: 4, C: 3, D: 2, E: 1 };
+
+let currentAchievementTerm = "term1";
+
+function loadAchievementTerm() {
+  const savedTerm = localStorage.getItem(ACHIEVEMENT_TERM_STORAGE_KEY);
+  return VALID_ACHIEVEMENT_TERMS.includes(savedTerm) ? savedTerm : "term1";
+}
+
+function selectAchievementTerm(termKey) {
+  if (!VALID_ACHIEVEMENT_TERMS.includes(termKey)) termKey = "term1";
+  currentAchievementTerm = termKey;
+  localStorage.setItem(ACHIEVEMENT_TERM_STORAGE_KEY, termKey);
+  renderAchievementTabs();
+  renderAchievementChart();
+}
+
+// 章の表示タイトルを作る（例: "技1A 第2章（最大・最小）" → "技ⅠA 第2章 最大・最小"）
+function formatAchievementChapterTitle(chapterRef) {
+  const rawTitle = problemBank[chapterRef].title;
+  const converted = rawTitle.replace("技1A", "技ⅠA").replace("技2B", "技ⅡB");
+  const match = converted.match(/^(.*)（(.+)）$/);
+  if (!match) return converted;
+  return `${match[1]} ${match[2]}`;
+}
+
+// 問題1問の得点（未演習・不正な評価値は0点。最後につけた自己評価だけを使う）
+function getLatestEvaluationScore(chapterRef, problemNumber, records) {
+  const key = `${chapterRef}_${problemNumber}`;
+  const history = Array.isArray(records[key]) ? records[key] : [];
+  if (history.length === 0) return 0;
+  const latest = history[history.length - 1];
+  if (!latest || !latest.evaluation) return 0;
+  return ACHIEVEMENT_EVAL_SCORES[latest.evaluation] || 0;
+}
+
+// 章ごとの到達度を計算する（副作用なし）。referenceNumbers・宿題必須番号は判定に使わない。
+function calculateChapterAchievement(chapterRef, maxLevel, records) {
+  const chapter = problemBank[chapterRef];
+  const eligibleProblems = chapter.problems.filter(p => p.level <= maxLevel);
+  const eligibleCount = eligibleProblems.length;
+
+  if (eligibleCount === 0) {
+    return { chapterRef, eligibleCount: 0, totalScore: 0, maxScore: 0, percentage: 0, isPerfect: false };
+  }
+
+  let totalScore = 0;
+  eligibleProblems.forEach(p => {
+    totalScore += getLatestEvaluationScore(chapterRef, p.number, records);
+  });
+
+  const maxScore = eligibleCount * 5;
+  const rawPercentage = (totalScore / maxScore) * 100;
+  const percentage = Math.max(0, Math.min(100, Math.round(rawPercentage)));
+  const isPerfect = totalScore === maxScore;
+
+  return { chapterRef, eligibleCount, totalScore, maxScore, percentage, isPerfect };
+}
+
+// 学習到達度チェッカー画面を表示する
+function showAchievementScreen() {
+  document.getElementById("cover-screen").style.display = "none";
+  document.getElementById("main-screen").style.display = "none";
+  document.getElementById("guide-screen").style.display = "none";
+  document.getElementById("achievement-screen").style.display = "block";
+
+  currentAchievementTerm = loadAchievementTerm();
+  renderAchievementTabs();
+  renderAchievementChart();
+  window.scrollTo(0, 0);
+}
+
+// 学期タブを描画する
+function renderAchievementTabs() {
+  const container = document.getElementById("achievement-tabs");
+  container.innerHTML = VALID_ACHIEVEMENT_TERMS
+    .map(termKey => {
+      const config = ACHIEVEMENT_TERM_CONFIG[termKey];
+      const selected = termKey === currentAchievementTerm;
+      return `
+        <button type="button" role="tab" aria-selected="${selected}" class="achievement-tab${selected ? " selected" : ""}" onclick="selectAchievementTerm('${termKey}')">
+          <span class="achievement-tab-title">${config.label}</span>
+          <span class="achievement-tab-level">${config.levelLabel}</span>
+        </button>
+      `;
+    })
+    .join("");
+}
+
+// 選択中の学期の棒グラフを描画する（毎回演習履歴を読み直して最新状態で計算する）
+function renderAchievementChart() {
+  const container = document.getElementById("achievement-chart");
+  const config = ACHIEVEMENT_TERM_CONFIG[currentAchievementTerm];
+  const records = loadRecords();
+
+  const chapterRefs = ACHIEVEMENT_CHAPTER_ORDER.filter(ref => !config.excludeChapters.includes(ref));
+  const iaChapterRefs = chapterRefs.filter(ref => ref.startsWith("1a-"));
+  const iibChapterRefs = chapterRefs.filter(ref => ref.startsWith("2b-"));
+
+  function renderRow(chapterRef) {
+    const result = calculateChapterAchievement(chapterRef, config.maxLevel, records);
+    const title = formatAchievementChapterTitle(chapterRef);
+    const groupClass = chapterRef.startsWith("1a-") ? "ia" : "iib";
+    const fillClass = result.isPerfect ? "achievement-bar-fill perfect" : `achievement-bar-fill ${groupClass}`;
+    const percentClass = result.isPerfect ? "achievement-percent perfect" : "achievement-percent";
+
+    return `
+      <div class="achievement-row">
+        <div class="achievement-row-title">${title}</div>
+        <div class="achievement-row-bar-wrap">
+          <div class="achievement-bar-track" role="img" aria-label="${title} 到達度${result.percentage}%">
+            <div class="${fillClass}" style="width: ${result.percentage}%;"></div>
+          </div>
+          <div class="${percentClass}">${result.percentage}%</div>
+        </div>
+      </div>
+    `;
+  }
+
+  const iaHtml = iaChapterRefs.map(renderRow).join("");
+  const iibHtml = iibChapterRefs.map(renderRow).join("");
+
+  container.innerHTML = `
+    ${iaChapterRefs.length > 0 ? `<p class="achievement-group-heading">技ⅠA</p>${iaHtml}` : ""}
+    ${iibChapterRefs.length > 0 ? `<p class="achievement-group-heading">技ⅡB</p>${iibHtml}` : ""}
+  `;
 }
 
 // 表紙画面の学期ボタンを作る

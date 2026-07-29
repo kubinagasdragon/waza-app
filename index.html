@@ -13,7 +13,7 @@
   <meta name="apple-mobile-web-app-title" content="技 完全攻略">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=1.0.6">
+  <link rel="stylesheet" href="style.css?v=1.0.7">
 </head>
 <body>
   <div id="cover-screen" class="cover-screen">
@@ -30,6 +30,8 @@
     <button type="button" id="cover-start-btn" class="cover-start-btn disabled" onclick="startFromCover()">START</button>
 
     <button type="button" class="cover-howto" onclick="showGuideScreen()">使い方ガイドライン <span class="cover-howto-note">（重要）</span></button>
+
+    <button type="button" class="achievement-checker-btn" onclick="showAchievementScreen()">学習到達度チェッカー 📊</button>
 
     <div class="cover-device-block">
       <div class="cover-device-heading">▼ 機種変更する方へ ▼</div>
@@ -235,6 +237,20 @@
       </div>
 
       <h2 id="guide-sec-7">7. アプリのその他の仕様</h2>
+      <p class="guide-subhead guide-subhead-first">○ 学習到達度チェッカー 📊</p>
+      <p>ホーム画面の「<a href="javascript:void(0)" class="guide-inline-link" onclick="showAchievementScreen()">学習到達度チェッカー 📊</a>」を開くと、「技」の各章について、現在の学習到達度を棒グラフで確認できます。</p>
+      <p>画面上部のタブから、1学期／2学期／3学期以降を切り替えられます。それぞれの学期で対象となる問題は次の通りです。</p>
+      <ul class="guide-sublist">
+        <li>1学期：Lv.1〜2</li>
+        <li>2学期：Lv.1〜3</li>
+        <li>3学期以降：Lv.1〜4</li>
+      </ul>
+      <p>到達度は、各問題につけた最新の自己評価を、次の点数に換算して計算しています。</p>
+      <p>A：5点　B：4点　C：3点　D：2点　E：1点　未演習：0点</p>
+      <p>すべての対象問題がA評価の場合を100%として、章ごとの到達度を表示します。複数回演習した問題については、過去の平均や最高評価ではなく、最後につけた自己評価が反映されます。</p>
+      <p>ただし、この数値はあくまで自分で記録した自己評価をもとにした目安です。一度A評価をつけただけで完全に定着したとは限りません。時間を空けてもう一度解き、本当に自力で再現できるか確かめながら活用してください。</p>
+      <p>最後に開いていた学期のタブは自動的に保存され、次回も同じタブから確認できます。演習履歴を追加・編集・削除した場合は、最新の記録をもとに到達度が自動で再計算されます。</p>
+
       <p class="guide-subhead">○ 機種変更時のデータ書き出し</p>
       <p>演習記録はこの端末（このブラウザ）だけに保存されており、他の端末とは自動で同期されません。機種変更やブラウザの変更をする前に、必ず以下の手順でバックアップを取ってください。</p>
       <ul>
@@ -330,6 +346,19 @@
     </div>
   </div>
 
+  <div id="achievement-screen" class="app" style="display:none;">
+    <div class="content achievement-content">
+      <button type="button" class="back-to-cover-btn" onclick="showCoverScreen()">＜ ホーム画面へ</button>
+
+      <h1 class="achievement-title">学習到達度チェッカー 📊</h1>
+      <p class="achievement-note">各章の最新の自己評価から算出しています</p>
+
+      <div class="achievement-tabs" id="achievement-tabs" role="tablist"></div>
+
+      <div class="achievement-chart" id="achievement-chart" role="tabpanel" aria-label="学期別・章別の学習到達度"></div>
+    </div>
+  </div>
+
   <div id="mistake-modal" class="modal-overlay" style="display:none;">
     <div class="modal-card">
       <h3>ミス内容を選択してください（複数選択可）</h3>
@@ -344,15 +373,15 @@
 
   <div id="changelog-modal" class="modal-overlay" style="display:none;">
     <div class="modal-card">
-      <h3>更新履歴</h3>
-      <div id="changelog-list"></div>
-      <div class="modal-buttons">
-        <button class="modal-cancel" onclick="closeChangelogModal()">閉じる</button>
+      <div class="modal-header-row">
+        <h3>更新履歴</h3>
+        <button type="button" class="modal-close-x" onclick="closeChangelogModal()" aria-label="閉じる">✕</button>
       </div>
+      <div id="changelog-list"></div>
     </div>
   </div>
 
-  <script src="data.js?v=1.0.6"></script>
-  <script src="script.js?v=1.0.6"></script>
+  <script src="data.js?v=1.0.7"></script>
+  <script src="script.js?v=1.0.7"></script>
 </body>
 </html>
