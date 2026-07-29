@@ -579,10 +579,8 @@ function saveEditedMistake(problem, i) {
   renderProblems();
 }
 
-// 履歴の記録を削除する（間違えて入力した記録の削除用。元に戻せないので確認を挟む）
+// 履歴の記録を削除する（間違えて入力した記録の削除用）
 function deleteHistoryEntry(problem, i) {
-  if (!confirm("この記録を削除しますか？（元に戻せません）")) return;
-
   const records = loadRecords();
   const key = recordKey(problem);
   records[key].splice(i, 1);
