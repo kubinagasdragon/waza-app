@@ -813,7 +813,7 @@ button {
 /* ===== 使い方ガイドライン画面 ===== */
 
 .guide-content {
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.8;
   color: #cbd5e1;
 }
@@ -827,11 +827,11 @@ button {
 }
 
 .guide-title-line1 {
-  font-size: 16px;
+  font-size: 17px;
 }
 
 .guide-title-line2 {
-  font-size: 24px;
+  font-size: 25px;
 }
 
 .guide-toc {
@@ -845,7 +845,7 @@ button {
 .guide-toc-title {
   font-weight: bold;
   color: #94a3b8;
-  font-size: 12px;
+  font-size: 13px;
   margin: 0 0 8px;
 }
 
@@ -862,7 +862,7 @@ button {
 .guide-toc a {
   color: #7fb0ff;
   text-decoration: none;
-  font-size: 12px;
+  font-size: 13px;
   display: block;
   padding: 5px 0;
 }
@@ -872,7 +872,7 @@ button {
 }
 
 .guide-content h2 {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: bold;
   color: #f1f5f9;
   border-bottom: 2px solid #3b82f6;
@@ -899,13 +899,13 @@ button {
 }
 
 .guide-content strong {
-  font-size: 12px;
+  font-size: 13px;
   color: #f1f5f9;
   font-weight: bold;
 }
 
 .guide-emphasis-line {
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .guide-book-images {
@@ -946,11 +946,11 @@ button {
 .guide-credit {
   text-align: right;
   color: #7f8ba3;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .guide-subhead {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: bold;
   color: #f1f5f9;
   margin: 22px 0 6px;
@@ -972,7 +972,7 @@ button {
 }
 
 .guide-question {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: bold;
   color: #f1f5f9;
   margin-top: 20px;
@@ -994,7 +994,7 @@ button {
   border: none;
   padding: 0;
   font-family: inherit;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: bold;
   color: #f1f5f9;
   text-align: left;
@@ -1004,7 +1004,7 @@ button {
 .guide-qa-arrow {
   flex-shrink: 0;
   color: #7fb0ff;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .guide-qa-answer {
@@ -1013,7 +1013,7 @@ button {
 }
 
 .guide-content strong.guide-strong-sm {
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .guide-note {
@@ -1025,7 +1025,7 @@ button {
 }
 
 .guide-note-title {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: bold;
   color: #e6b93d;
   margin: 0 0 8px;
@@ -1033,13 +1033,13 @@ button {
 
 .guide-citation {
   color: #7f8ba3;
-  font-size: 9px;
+  font-size: 10px;
   font-style: italic;
   margin: -6px 0 18px;
 }
 
 .guide-ref {
-  font-size: 9px;
+  font-size: 10px;
 }
 
 .guide-blank-line {
@@ -1061,7 +1061,7 @@ button {
 .guide-footer {
   text-align: center;
   color: #5b6472;
-  font-size: 11px;
+  font-size: 12px;
   margin-top: 30px;
   padding-top: 16px;
   border-top: 1px solid rgba(148, 163, 184, 0.12);
