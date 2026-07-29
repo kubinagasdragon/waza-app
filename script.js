@@ -1,6 +1,15 @@
 // アプリの更新履歴（コミット・プッシュのたびに先頭に新しいバージョンを追加する）
 const CHANGELOG = [
   {
+    version: "1.0.5",
+    date: "2026-07-29",
+    changes: [
+      "「使い方ガイドライン」画面を新設し、表紙の「使い方ガイドライン（重要）」から開けるように（目次から各章にジャンプ可能）",
+      "使い方・演習の仕方・自己評価・Check Point・復習方法・アプリ仕様を解説し、科学的根拠に基づく勉強法（アクティブリコール・分散学習・自己説明など）のコラムを掲載",
+      "よくあるQ&Aを10問掲載。質問をタップすると回答が展開される形式に",
+    ],
+  },
+  {
     version: "1.0.4",
     date: "2026-07-28",
     changes: ["表紙画面の見た目を調整（「このアプリの使い方」「更新履歴」を目立たせ、機種変更・バックアップ関連は控えめに）"],
@@ -218,6 +227,7 @@ let coverSelectedTermIndex = null;
 function showCoverScreen() {
   document.getElementById("cover-screen").style.display = "flex";
   document.getElementById("main-screen").style.display = "none";
+  document.getElementById("guide-screen").style.display = "none";
 
   renderCoverTermButtons();
   document.getElementById("cover-version-text").textContent = APP_VERSION;
@@ -235,9 +245,33 @@ function showCoverScreen() {
 function showMainScreen() {
   document.getElementById("cover-screen").style.display = "none";
   document.getElementById("main-screen").style.display = "block";
+  document.getElementById("guide-screen").style.display = "none";
 
   renderUnitSelector();
   showView(currentView);
+}
+
+// 使い方ガイドライン画面を表示する
+function showGuideScreen() {
+  document.getElementById("cover-screen").style.display = "none";
+  document.getElementById("main-screen").style.display = "none";
+  document.getElementById("guide-screen").style.display = "block";
+  window.scrollTo(0, 0);
+}
+
+// ガイドライン内の目次タップで該当セクションまでジャンプする
+function scrollToGuideSection(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+// Q&Aの質問をタップしたときに答えの表示・非表示を切り替える
+function toggleGuideQA(id) {
+  const box = document.getElementById(id);
+  const arrow = document.getElementById("arrow-" + id);
+  const isOpen = box.style.display === "block";
+  box.style.display = isOpen ? "none" : "block";
+  if (arrow) arrow.textContent = isOpen ? "▼" : "▲";
 }
 
 // 表紙画面の学期ボタンを作る

@@ -750,3 +750,260 @@ button {
   background: #1b2536;
   color: #f1f5f9;
 }
+
+/* ===== 使い方ガイドライン画面 ===== */
+
+.guide-content {
+  font-size: 10.5px;
+  line-height: 1.8;
+  color: #cbd5e1;
+}
+
+.guide-title {
+  font-weight: 900;
+  color: #f8fafc;
+  text-align: center;
+  line-height: 1.5;
+  margin: 4px 0 24px;
+}
+
+.guide-title-line1 {
+  font-size: 16px;
+}
+
+.guide-title-line2 {
+  font-size: 24px;
+}
+
+.guide-toc {
+  background-color: #182238;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin: 0 0 28px;
+}
+
+.guide-toc-title {
+  font-weight: bold;
+  color: #94a3b8;
+  font-size: 12px;
+  margin: 0 0 8px;
+}
+
+.guide-toc ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.guide-toc li {
+  margin-bottom: 2px;
+}
+
+.guide-toc a {
+  color: #7fb0ff;
+  text-decoration: none;
+  font-size: 12px;
+  display: block;
+  padding: 5px 0;
+}
+
+.guide-toc a:active {
+  opacity: 0.7;
+}
+
+.guide-content h2 {
+  font-size: 15px;
+  font-weight: bold;
+  color: #f1f5f9;
+  border-bottom: 2px solid #3b82f6;
+  padding-bottom: 8px;
+  margin: 36px 0 14px;
+}
+
+.guide-content h2:first-of-type {
+  margin-top: 0;
+}
+
+.guide-content p {
+  margin: 0 0 12px;
+}
+
+.guide-content ul,
+.guide-content ol {
+  margin: 0 0 14px;
+  padding-left: 20px;
+}
+
+.guide-content li {
+  margin-bottom: 6px;
+}
+
+.guide-content strong {
+  font-size: 12px;
+  color: #f1f5f9;
+  font-weight: bold;
+}
+
+.guide-emphasis-line {
+  font-size: 12px;
+}
+
+.guide-book-images {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  margin: 4px 0 20px;
+}
+
+.guide-book-images img {
+  max-width: 42%;
+  max-height: 140px;
+  width: auto;
+  height: auto;
+  border-radius: 6px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.guide-single-image {
+  display: flex;
+  justify-content: center;
+  margin: 4px 0 20px;
+}
+
+.guide-single-image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.guide-single-image.guide-image-compact img {
+  max-width: 60%;
+}
+
+.guide-credit {
+  text-align: right;
+  color: #7f8ba3;
+  font-size: 11px;
+}
+
+.guide-subhead {
+  font-size: 12px;
+  font-weight: bold;
+  color: #f1f5f9;
+  margin: 22px 0 6px;
+}
+
+.guide-subhead-first {
+  margin-top: 4px;
+}
+
+.guide-content .guide-sublist {
+  margin: 0 0 8px;
+  padding-left: 22px;
+}
+
+.guide-content .guide-sublist li {
+  color: #b7c2d6;
+  line-height: 1.7;
+  margin-bottom: 4px;
+}
+
+.guide-question {
+  font-size: 12px;
+  font-weight: bold;
+  color: #f1f5f9;
+  margin-top: 20px;
+}
+
+.guide-qa-item {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  padding-bottom: 14px;
+  margin-top: 14px;
+}
+
+.guide-qa-question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: bold;
+  color: #f1f5f9;
+  text-align: left;
+  cursor: pointer;
+}
+
+.guide-qa-arrow {
+  flex-shrink: 0;
+  color: #7fb0ff;
+  font-size: 10px;
+}
+
+.guide-qa-answer {
+  display: none;
+  margin-top: 10px;
+}
+
+.guide-content strong.guide-strong-sm {
+  font-size: 10.5px;
+}
+
+.guide-note {
+  background-color: #182238;
+  border-left: 4px solid #e6b93d;
+  border-radius: 4px;
+  padding: 12px 14px;
+  margin: 14px 0 18px;
+}
+
+.guide-note-title {
+  font-size: 12px;
+  font-weight: bold;
+  color: #e6b93d;
+  margin: 0 0 8px;
+}
+
+.guide-citation {
+  color: #7f8ba3;
+  font-size: 9px;
+  font-style: italic;
+  margin: -6px 0 18px;
+}
+
+.guide-ref {
+  font-size: 9px;
+}
+
+.guide-blank-line {
+  height: 12px;
+  margin: 0;
+}
+
+.guide-inline-link {
+  color: #7fb0ff;
+  text-decoration: none;
+}
+
+.guide-eval-A { color: #22c55e; }
+.guide-eval-B { color: #d6a80f; }
+.guide-eval-C { color: #f97316; }
+.guide-eval-D { color: #ef4444; }
+.guide-eval-E { color: #a855f7; }
+
+.guide-footer {
+  text-align: center;
+  color: #5b6472;
+  font-size: 11px;
+  margin-top: 30px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
