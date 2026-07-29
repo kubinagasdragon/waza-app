@@ -1,6 +1,14 @@
 // アプリの更新履歴（コミット・プッシュのたびに先頭に新しいバージョンを追加する）
 const CHANGELOG = [
   {
+    version: "1.0.6",
+    date: "2026-07-29",
+    changes: [
+      "ホーム画面に追加した端末で更新が反映されにくい問題に対応。表紙画面に「🔁 最新版を確認する」ボタンを追加",
+      "アプリ本体のファイルにバージョン番号を付け、更新のたびに新しい内容を確実に読み込めるように",
+    ],
+  },
+  {
     version: "1.0.5",
     date: "2026-07-29",
     changes: [
@@ -272,6 +280,30 @@ function toggleGuideQA(id) {
   const isOpen = box.style.display === "block";
   box.style.display = isOpen ? "none" : "block";
   if (arrow) arrow.textContent = isOpen ? "▼" : "▲";
+}
+
+// 「最新版を確認する」ボタン：ホーム画面に追加した端末でキャッシュにより
+// 更新が反映されないことがあるため、サーバー上の最新版を強制的に取得して比較する
+async function checkForUpdate() {
+  const statusEl = document.getElementById("cover-update-status");
+  statusEl.textContent = "確認中…";
+  try {
+    const res = await fetch("script.js?check=" + Date.now(), { cache: "no-store" });
+    const text = await res.text();
+    const match = text.match(/version:\s*"([\d.]+)"/);
+    const latestVersion = match ? match[1] : null;
+
+    if (latestVersion && latestVersion !== APP_VERSION) {
+      statusEl.textContent = `新しいバージョン（ver ${latestVersion}）があります。更新します…`;
+      setTimeout(() => {
+        window.location.href = window.location.pathname + "?refresh=" + Date.now();
+      }, 900);
+    } else {
+      statusEl.textContent = `最新版です（ver ${APP_VERSION}）`;
+    }
+  } catch (e) {
+    statusEl.textContent = "確認できませんでした。通信環境をご確認のうえ、もう一度お試しください。";
+  }
 }
 
 // 表紙画面の学期ボタンを作る

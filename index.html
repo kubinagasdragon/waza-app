@@ -13,7 +13,7 @@
   <meta name="apple-mobile-web-app-title" content="技 完全攻略">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=1.0.6">
 </head>
 <body>
   <div id="cover-screen" class="cover-screen">
@@ -43,6 +43,8 @@
     </div>
 
     <button type="button" class="cover-version cover-version-btn" onclick="openChangelogModal()"><span class="cover-version-plain">アプリ ver <span id="cover-version-text"></span></span>　<span class="cover-version-highlight">更新履歴 ＞</span></button>
+    <button type="button" class="cover-update-check-btn" onclick="checkForUpdate()">🔁 最新版を確認する</button>
+    <div class="cover-update-status" id="cover-update-status"></div>
     <div class="cover-version">© 高等進学塾／designed by Masahiro Imura</div>
   </div>
 
@@ -245,7 +247,7 @@
       <div class="guide-single-image guide-image-compact">
         <img src="images/guide-changelog-example.jpg" alt="更新履歴の表示例">
       </div>
-      <p>・基本的にアップデートはブラウザ内で自動的に実施されます。アップデートされても学習履歴が消去されることはありません。</p>
+      <p>・基本的にブラウザ内でアップデートは自動的に実施されますが、動作が遅れる場合があるので、適宜「🔁 最新版を確認する」ボタンを押してご確認下さい。アップデートされても学習履歴が消去されることはありません。</p>
 
       <h2 id="guide-sec-8">8. よくあるQ＆A（勉強法について、アプリについて）</h2>
 
@@ -350,7 +352,7 @@
     </div>
   </div>
 
-  <script src="data.js"></script>
-  <script src="script.js"></script>
+  <script src="data.js?v=1.0.6"></script>
+  <script src="script.js?v=1.0.6"></script>
 </body>
 </html>

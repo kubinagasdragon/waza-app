@@ -217,6 +217,27 @@ body {
   font-weight: 700;
 }
 
+.cover-update-check-btn {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 10px;
+  color: #5b6472;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.cover-update-status {
+  text-align: center;
+  font-size: 10px;
+  color: #7fb0ff;
+  margin-top: 6px;
+  min-height: 14px;
+}
+
 .changelog-entry {
   padding: 10px 0;
   border-bottom: 1px solid #2f3b52;
@@ -754,7 +775,7 @@ button {
 /* ===== 使い方ガイドライン画面 ===== */
 
 .guide-content {
-  font-size: 10.5px;
+  font-size: 11px;
   line-height: 1.8;
   color: #cbd5e1;
 }
@@ -954,7 +975,7 @@ button {
 }
 
 .guide-content strong.guide-strong-sm {
-  font-size: 10.5px;
+  font-size: 11px;
 }
 
 .guide-note {
