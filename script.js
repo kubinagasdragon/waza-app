@@ -1,6 +1,17 @@
 // アプリの更新履歴（コミット・プッシュのたびに先頭に新しいバージョンを追加する）
 const CHANGELOG = [
   {
+    version: "1.0.8",
+    date: "2026-08-04",
+    changes: [
+      "学習到達度チェッカーに、学期ごとの「全範囲」到達度を表示する行を追加",
+      "画面左端からのスワイプでホーム画面に戻れるように",
+      "履歴削除（🗑️）の確認ポップアップを廃止し、ワンタップで削除できるように",
+      "ホーム画面の「学習到達度チェッカー」ボタンのサイズを「使い方ガイドライン」と統一",
+      "使い方ガイドラインの文字サイズを調整して読みやすく",
+    ],
+  },
+  {
     version: "1.0.7",
     date: "2026-07-30",
     changes: [
@@ -328,9 +339,9 @@ const ACHIEVEMENT_CHAPTER_ORDER = [
 
 // 学期ごとの対象レベル・除外章（演習画面の講構成とは独立に、章単位で判定する）
 const ACHIEVEMENT_TERM_CONFIG = {
-  term1: { label: "1学期", levelLabel: "Lv.1–2", maxLevel: 2, excludeChapters: ["1a-1", "1a-4", "2b-1", "2b-8"] },
-  term2: { label: "2学期", levelLabel: "Lv.1–3", maxLevel: 3, excludeChapters: ["2b-8"] },
-  term3: { label: "3学期以降", levelLabel: "Lv.1–4", maxLevel: 4, excludeChapters: [] },
+  term1: { label: "1学期", levelLabel: "Lv.1–2", maxLevel: 2, excludeChapters: ["1a-1", "1a-4", "2b-1", "2b-8"], termNumber: "1" },
+  term2: { label: "2学期", levelLabel: "Lv.1–3", maxLevel: 3, excludeChapters: ["2b-8"], termNumber: "2" },
+  term3: { label: "3学期以降", levelLabel: "Lv.1–4", maxLevel: 4, excludeChapters: [], termNumber: "3" },
 };
 
 const ACHIEVEMENT_TERM_STORAGE_KEY = "achievementSelectedTerm";
@@ -392,6 +403,30 @@ function calculateChapterAchievement(chapterRef, maxLevel, records) {
   const isPerfect = totalScore === maxScore;
 
   return { chapterRef, eligibleCount, totalScore, maxScore, percentage, isPerfect };
+}
+
+// 学期全体（表示中の全章合算）の到達度を計算する（副作用なし）
+function calculateTermAchievement(chapterRefs, maxLevel, records) {
+  let totalScore = 0;
+  let maxScore = 0;
+  let eligibleCount = 0;
+
+  chapterRefs.forEach(chapterRef => {
+    const result = calculateChapterAchievement(chapterRef, maxLevel, records);
+    totalScore += result.totalScore;
+    maxScore += result.maxScore;
+    eligibleCount += result.eligibleCount;
+  });
+
+  if (eligibleCount === 0) {
+    return { eligibleCount: 0, totalScore: 0, maxScore: 0, percentage: 0, isPerfect: false };
+  }
+
+  const rawPercentage = (totalScore / maxScore) * 100;
+  const percentage = Math.max(0, Math.min(100, Math.round(rawPercentage)));
+  const isPerfect = totalScore === maxScore;
+
+  return { eligibleCount, totalScore, maxScore, percentage, isPerfect };
 }
 
 // 学習到達度チェッカー画面を表示する
@@ -457,9 +492,26 @@ function renderAchievementChart() {
   const iaHtml = iaChapterRefs.map(renderRow).join("");
   const iibHtml = iibChapterRefs.map(renderRow).join("");
 
+  const totalResult = calculateTermAchievement(chapterRefs, config.maxLevel, records);
+  const totalTitle = currentAchievementTerm === "term3" ? "技ⅠA・ⅡB 全問題" : `${config.termNumber}学期全範囲`;
+  const totalFillClass = totalResult.isPerfect ? "achievement-bar-fill perfect" : "achievement-bar-fill total";
+  const totalPercentClass = totalResult.isPerfect ? "achievement-percent perfect" : "achievement-percent";
+  const totalHtml = `
+    <div class="achievement-row achievement-total-row">
+      <div class="achievement-row-title">${totalTitle}</div>
+      <div class="achievement-row-bar-wrap">
+        <div class="achievement-bar-track" role="img" aria-label="${totalTitle} 到達度${totalResult.percentage}%">
+          <div class="${totalFillClass}" style="width: ${totalResult.percentage}%;"></div>
+        </div>
+        <div class="${totalPercentClass}">${totalResult.percentage}%</div>
+      </div>
+    </div>
+  `;
+
   container.innerHTML = `
     ${iaChapterRefs.length > 0 ? `<p class="achievement-group-heading">技ⅠA</p>${iaHtml}` : ""}
     ${iibChapterRefs.length > 0 ? `<p class="achievement-group-heading">技ⅡB</p>${iibHtml}` : ""}
+    ${totalHtml}
   `;
 }
 
