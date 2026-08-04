@@ -1,6 +1,14 @@
 // アプリの更新履歴（コミット・プッシュのたびに先頭に新しいバージョンを追加する）
 const CHANGELOG = [
   {
+    version: "1.0.9",
+    date: "2026-08-04",
+    changes: [
+      "学習到達度チェッカーで、「要復習」バッジがついたままA・Bをつけた問題はC評価として計算するように変更",
+      "使い方ガイドラインに、上記の計算方法についての説明を追加",
+    ],
+  },
+  {
     version: "1.0.8",
     date: "2026-08-04",
     changes: [
@@ -379,6 +387,11 @@ function getLatestEvaluationScore(chapterRef, problemNumber, records) {
   if (history.length === 0) return 0;
   const latest = history[history.length - 1];
   if (!latest || !latest.evaluation) return 0;
+
+  // 要復習バッジが付いたままA/Bをつけても、1回の演習だけで満点評価にはしない（C評価として扱う）
+  if (["A", "B"].includes(latest.evaluation) && needsReview(history)) {
+    return ACHIEVEMENT_EVAL_SCORES.C;
+  }
   return ACHIEVEMENT_EVAL_SCORES[latest.evaluation] || 0;
 }
 
