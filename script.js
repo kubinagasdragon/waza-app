@@ -865,6 +865,61 @@ function showView(view) {
   }
 }
 
+// ===== 画面左端からのスワイプでホーム画面に戻る =====
+// iOSのエッジスワイプに合わせ、画面左端付近から始まったタッチのみを対象にする（誤操作防止）。
+(function setupSwipeBack() {
+  const EDGE_ZONE_PX = 24;
+  const SWIPE_THRESHOLD_PX = 80;
+  const MAX_VERTICAL_RATIO = 0.5;
+
+  let startX = null;
+  let startY = null;
+
+  function isModalOpen() {
+    const mistakeModal = document.getElementById("mistake-modal");
+    const changelogModal = document.getElementById("changelog-modal");
+    return mistakeModal.style.display === "flex" || changelogModal.style.display === "flex";
+  }
+
+  function isBackableScreenVisible() {
+    return (
+      document.getElementById("main-screen").style.display !== "none" ||
+      document.getElementById("guide-screen").style.display !== "none" ||
+      document.getElementById("achievement-screen").style.display !== "none"
+    );
+  }
+
+  document.addEventListener(
+    "touchstart",
+    (e) => {
+      if (e.touches.length !== 1 || e.touches[0].clientX > EDGE_ZONE_PX) {
+        startX = null;
+        return;
+      }
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    },
+    { passive: true }
+  );
+
+  document.addEventListener(
+    "touchend",
+    (e) => {
+      if (startX === null) return;
+      const touch = e.changedTouches[0];
+      const dx = touch.clientX - startX;
+      const dy = Math.abs(touch.clientY - startY);
+      startX = null;
+
+      if (dx < SWIPE_THRESHOLD_PX || dy > dx * MAX_VERTICAL_RATIO) return;
+      if (isModalOpen() || !isBackableScreenVisible()) return;
+
+      showCoverScreen();
+    },
+    { passive: true }
+  );
+})();
+
 // ページが読み込まれたら、前回の続きがあれば表紙を飛ばしてメイン画面へ、なければ表紙画面を表示する
 (function initApp() {
   const saved = loadAppState();
