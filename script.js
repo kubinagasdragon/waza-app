@@ -1,6 +1,13 @@
 // アプリの更新履歴（コミット・プッシュのたびに先頭に新しいバージョンを追加する）
 const CHANGELOG = [
   {
+    version: "1.0.10",
+    date: "2026-08-04",
+    changes: [
+      "ホーム画面を開いた状態でアプリを閉じたときは、次回もホーム画面（前回の学期が選択された状態）から再開するように変更",
+    ],
+  },
+  {
     version: "1.0.9",
     date: "2026-08-04",
     changes: [
@@ -256,6 +263,15 @@ function loadAppState() {
   return raw ? JSON.parse(raw) : null;
 }
 
+// 直近に開いていたのがホーム画面か演習画面かを覚えておく（次回起動時にどちらを開くか判定するため）
+function saveLastScreen(screen) {
+  localStorage.setItem("lastScreen", screen);
+}
+
+function loadLastScreen() {
+  return localStorage.getItem("lastScreen");
+}
+
 // 表紙画面で今タップされている学期（STARTを押すまでは未確定）
 let coverSelectedTermIndex = null;
 
@@ -265,6 +281,7 @@ function showCoverScreen() {
   document.getElementById("main-screen").style.display = "none";
   document.getElementById("guide-screen").style.display = "none";
   document.getElementById("achievement-screen").style.display = "none";
+  saveLastScreen("cover");
 
   renderCoverTermButtons();
   document.getElementById("cover-version-text").textContent = APP_VERSION;
@@ -284,6 +301,7 @@ function showMainScreen() {
   document.getElementById("main-screen").style.display = "block";
   document.getElementById("guide-screen").style.display = "none";
   document.getElementById("achievement-screen").style.display = "none";
+  saveLastScreen("main");
 
   renderUnitSelector();
   showView(currentView);
@@ -988,7 +1006,10 @@ function showView(view) {
 // ページが読み込まれたら、前回の続きがあれば表紙を飛ばしてメイン画面へ、なければ表紙画面を表示する
 (function initApp() {
   const saved = loadAppState();
-  if (saved && terms[saved.termIndex]) {
+  const lastScreen = loadLastScreen();
+  // 前回ホーム画面を開いた状態で閉じていた場合は、演習の続きへは飛ばずホーム画面を再表示する
+  // （ホーム画面側で、前回選んでいた学期のランプは自動的に選択状態になる）
+  if (saved && terms[saved.termIndex] && lastScreen !== "cover") {
     currentTermIndex = saved.termIndex;
     currentUnitIndex = saved.unitIndex || 0;
     showMainScreen();
