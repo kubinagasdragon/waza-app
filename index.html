@@ -13,7 +13,7 @@
   <meta name="apple-mobile-web-app-title" content="技 完全攻略">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=1.0.10">
+  <link rel="stylesheet" href="style.css?v=1.0.11">
 </head>
 <body>
   <div id="cover-screen" class="cover-screen">
@@ -89,7 +89,7 @@
 
       <h1 class="guide-title"><span class="guide-title-line1"><span class="cover-title-gold">「<span class="cover-title-accent">技</span>」</span>完全攻略への道</span><br><span class="guide-title-line2">使い方ガイドライン</span></h1>
 
-      <p>これは、「技」の問題演習を記録し、自分の理解度を可視化しながら効率よく復習するために開発したwebアプリです。基本的には"高等進学塾 高２東京医進数学ⅠA・ⅡBクラス受講生"の使用を想定していますが、高３以降や非受講生でも使えます。まずはアプリの使い方やより効果的な勉強の仕方を確認して、日々の演習に役立ててください。</p>
+      <p>これは、「技」の問題演習を記録し、自分の理解度を可視化しながら効率よく復習するために開発したwebアプリです。完全無料、アカウント登録なしで簡単に使えます。基本的には"高等進学塾 高２東京医進数学ⅠA・ⅡBクラス受講生"の使用を想定していますが、高３以降や非受講生でも使えます。まずはアプリの使い方やより効果的な勉強の仕方を確認して、日々の演習に役立ててください。</p>
       <p class="guide-credit">（文責：高等進学塾 数学科　井村）</p>
 
       <nav class="guide-toc">
@@ -269,36 +269,64 @@
       <h2 id="guide-sec-8">8. よくあるQ＆A（勉強法について、アプリについて）</h2>
 
       <div class="guide-qa-item">
-        <button type="button" class="guide-qa-question" onclick="toggleGuideQA('qa-1')">・「技」は何周やったらいいんですか？<span class="guide-qa-arrow" id="arrow-qa-1">▼</span></button>
+        <button type="button" class="guide-qa-question" onclick="toggleGuideQA('qa-1')">・このアプリは無料で使えますか？<span class="guide-qa-arrow" id="arrow-qa-1">▼</span></button>
         <div class="guide-qa-answer" id="qa-1">
+          <p>はい、無料です。「技」の教材自体は購入が必要ですが、このアプリ自体の利用に料金はかかりません。今後も基本的には無料で提供する予定です。</p>
+        </div>
+      </div>
+
+      <div class="guide-qa-item">
+        <button type="button" class="guide-qa-question" onclick="toggleGuideQA('qa-2')">・このアプリはメールアドレスなど登録が必要ですか？<span class="guide-qa-arrow" id="arrow-qa-2">▼</span></button>
+        <div class="guide-qa-answer" id="qa-2">
+          <p>いいえ、登録は一切不要です。ログインやメールアドレスの入力なしに、アクセスするだけですぐに使えます。そもそも利用者登録の仕組み自体がアプリに存在しません。</p>
+        </div>
+      </div>
+
+      <div class="guide-qa-item">
+        <button type="button" class="guide-qa-question" onclick="toggleGuideQA('qa-3')">・演習記録は講師側に共有されますか？<span class="guide-qa-arrow" id="arrow-qa-3">▼</span></button>
+        <div class="guide-qa-answer" id="qa-3">
+          <p>いいえ、自動的に共有されることはありません。演習記録はご自身の端末（ブラウザ）内にのみ保存される仕組みになっており、サーバーやデータベースは存在しないため、講師や塾を含め誰にも送信されません。</p>
+        </div>
+      </div>
+
+      <div class="guide-qa-item">
+        <button type="button" class="guide-qa-question" onclick="toggleGuideQA('qa-4')">・アプリだけで勉強できるようになりませんか？<span class="guide-qa-arrow" id="arrow-qa-4">▼</span></button>
+        <div class="guide-qa-answer" id="qa-4">
+          <p>著作権上の観点から、それはできません。アプリには「技」の問題文や解答そのものは収録しておらず、問題番号と開発者が独自に作成したCheck Pointのみを扱う仕様にしています。お手数ですが、「技」を必ず手元に用意した上でご使用ください。</p>
+        </div>
+      </div>
+
+      <div class="guide-qa-item">
+        <button type="button" class="guide-qa-question" onclick="toggleGuideQA('qa-5')">・「技」は何周やったらいいんですか？<span class="guide-qa-arrow" id="arrow-qa-5">▼</span></button>
+        <div class="guide-qa-answer" id="qa-5">
           <p>人によって能力や到達度が異なるので、決まった正解の回数はありません。目安として「1学期の間にLv.1-2、2学期の間にLv.1-3、3学期の間にLv.1-4（最低でもLv.1-3）の問題を完璧に解ききるまで繰り返す」ことを目標にしてください。カリキュラム自体が1年で技を3周する設計になっており、これは「間隔を空けて繰り返す（分散学習）」と「できるまでアクティブリコールを繰り返す（連続的再学習）」を組み合わせた、理にかなった仕組みになっています。1周目でC〜Eだった問題を「要復習」フィルタで拾い、A（or B）になるまで周回ごとに解き直す、というアプリの使い方がそのまま実践方法になります。</p>
         </div>
       </div>
 
       <div class="guide-qa-item">
-        <button type="button" class="guide-qa-question" onclick="toggleGuideQA('qa-2')">・「技」を読むだけでも意味ありますか？<span class="guide-qa-arrow" id="arrow-qa-2">▼</span></button>
-        <div class="guide-qa-answer" id="qa-2">
+        <button type="button" class="guide-qa-question" onclick="toggleGuideQA('qa-6')">・「技」を読むだけでも意味ありますか？<span class="guide-qa-arrow" id="arrow-qa-6">▼</span></button>
+        <div class="guide-qa-answer" id="qa-6">
           <p>意味はゼロではありませんが、効果は限定的です。同じ文章を2回目に読むとスラスラ読めるようになりますが、脳はこれを「覚えた」と誤解しがちです（「処理の流暢性」による錯覚と呼びます）。しかし「見れば分かる」と「見なくても再現できる」は全く別物で、テストで問われるのは後者です。読むのは最初の理解のためと割り切り、そのあとは実際に手を動かして問題を解く、Check Point！に自分の言葉で答える、といった「思い出す」練習に時間を使いましょう。</p>
         </div>
       </div>
 
       <div class="guide-qa-item">
-        <button type="button" class="guide-qa-question" onclick="toggleGuideQA('qa-3')">・「技」のPointまとめノートを作ろうと思いますがどうですか？<span class="guide-qa-arrow" id="arrow-qa-3">▼</span></button>
-        <div class="guide-qa-answer" id="qa-3">
+        <button type="button" class="guide-qa-question" onclick="toggleGuideQA('qa-7')">・「技」のPointまとめノートを作ろうと思いますがどうですか？<span class="guide-qa-arrow" id="arrow-qa-7">▼</span></button>
+        <div class="guide-qa-answer" id="qa-7">
           <p>教科書や解答をそのまま書き写す「まとめノート作り」は、手は動いていても頭はほぼ受け身の状態になりやすく、Dunloskyらの評価でも効果は「低」とされています<span class="guide-ref">（Dunlosky J, et al. Psychological Science in the Public Interest. 2013;14(1):4-58.）</span>。ただし、教材を閉じて、記憶の中から思い出しながら書くなら、それは単なるまとめ作業ではなく「アクティブリコール」になります。ノートは「完成品を作る」のではなく「思い出すための道具」として使うのがおすすめです。</p>
         </div>
       </div>
 
       <div class="guide-qa-item">
-        <button type="button" class="guide-qa-question" onclick="toggleGuideQA('qa-4')">・「技」をやったら合格できますか？<span class="guide-qa-arrow" id="arrow-qa-4">▼</span></button>
-        <div class="guide-qa-answer" id="qa-4">
+        <button type="button" class="guide-qa-question" onclick="toggleGuideQA('qa-8')">・「技」をやったら合格できますか？<span class="guide-qa-arrow" id="arrow-qa-8">▼</span></button>
+        <div class="guide-qa-answer" id="qa-8">
           <p>技の演習だけで自動的に合格が保証されるわけではありませんが、<strong class="guide-strong-sm">「技」はその範囲において最も効率的な演習法の土台になると確信</strong>しています。本アプリで推奨している勉強法を意識して「技」を使えば、同じ時間でも定着度は大きく変わります。ただし、「技」以外にも他の数学問題の演習、他教科とのバランスなど、合格には様々な要素が関わってきますので、担当講師とも相談しながら計画を立ててください。</p>
         </div>
       </div>
 
       <div class="guide-qa-item">
-        <button type="button" class="guide-qa-question" onclick="toggleGuideQA('qa-5')">・「技」と同じ問題は解けるけど、形が変わると解けません。<span class="guide-qa-arrow" id="arrow-qa-5">▼</span></button>
-        <div class="guide-qa-answer" id="qa-5">
+        <button type="button" class="guide-qa-question" onclick="toggleGuideQA('qa-9')">・「技」と同じ問題は解けるけど、形が変わると解けません。<span class="guide-qa-arrow" id="arrow-qa-9">▼</span></button>
+        <div class="guide-qa-answer" id="qa-9">
           <p>よくある悩みですが、原因は「解法を覚えている」段階で止まっていて、「なぜその解法を使うのか」という本質まで理解できていないことがほとんどです。対策は大きく2つあります。</p>
           <ol>
             <li><strong class="guide-strong-sm">Check Point！に自分の言葉で答える練習をすること</strong>：「なぜこの式変形をするのか」を説明できるかどうかが本質理解の指標であり、「自己説明・精緻的質問」という手法です（5.参照）。</li>
@@ -309,36 +337,36 @@
       </div>
 
       <div class="guide-qa-item">
-        <button type="button" class="guide-qa-question" onclick="toggleGuideQA('qa-6')">・「Check Point！」の答え一覧はないんですか？<span class="guide-qa-arrow" id="arrow-qa-6">▼</span></button>
-        <div class="guide-qa-answer" id="qa-6">
+        <button type="button" class="guide-qa-question" onclick="toggleGuideQA('qa-10')">・「Check Point！」の答え一覧はないんですか？<span class="guide-qa-arrow" id="arrow-qa-10">▼</span></button>
+        <div class="guide-qa-answer" id="qa-10">
           <p>「Check Point！」の質問一覧は作成しましたが、（諸事情により）現時点では答え一覧を作成する予定はありません。適宜「技」を確認するようにしてください。「Check Point！」のまとめノートを作るのは前述の通り非効率的なので推奨しませんが、どうしても覚えられないものだけノートに書き出したり暗記カードで繰り返したりするのは、アクティブリコールや分散学習という観点からも良いのではないかと思います。</p>
         </div>
       </div>
 
       <div class="guide-qa-item">
-        <button type="button" class="guide-qa-question" onclick="toggleGuideQA('qa-7')">・「技」の他にはどのような勉強をしたらいいですか？<span class="guide-qa-arrow" id="arrow-qa-7">▼</span></button>
-        <div class="guide-qa-answer" id="qa-7">
+        <button type="button" class="guide-qa-question" onclick="toggleGuideQA('qa-11')">・「技」の他にはどのような勉強をしたらいいですか？<span class="guide-qa-arrow" id="arrow-qa-11">▼</span></button>
+        <div class="guide-qa-answer" id="qa-11">
           <p>「技」の内容が本質的な部分まで完璧に習得できたら（といってもそれが中々大変です）、次にその内容をアウトプットすべく種々の問題を解いていくことになります。世の中には大学入試数学の参考書は沢山ありますが、最も推奨したいのが<strong class="guide-strong-sm">「講義テキストの解き直し」</strong>です。高２東京医進数学では1年間で600問程度の問題をテキストで扱うので、それだけでかなりの演習量になります。講義テキストも至極の良問を詰め込んでおり、技の内容ともリンクしており、何より授業内で自分の耳で聞き目で見て手で書いた内容が詰まっているので、再演習による学習効率が非常に高いと考えます。講義内容は一度聞いただけでは完全に再現できるわけではなく、むしろ大部分を忘れてしまっているものです。講義ノートやプリントには、復習しやすくするための講師の工夫が散りばめられています。長くなりましたが、講義問題の再演習を強く勧めます。それも済んでしまって手持ち無沙汰だという方は、適宜担当講師に相談してください。</p>
         </div>
       </div>
 
       <div class="guide-qa-item">
-        <button type="button" class="guide-qa-question" onclick="toggleGuideQA('qa-8')">・ミスが多いんですけどどうやったら減りますか？<span class="guide-qa-arrow" id="arrow-qa-8">▼</span></button>
-        <div class="guide-qa-answer" id="qa-8">
+        <button type="button" class="guide-qa-question" onclick="toggleGuideQA('qa-12')">・ミスが多いんですけどどうやったら減りますか？<span class="guide-qa-arrow" id="arrow-qa-12">▼</span></button>
+        <div class="guide-qa-answer" id="qa-12">
           <p>まず「自分がどのようなミスをしやすいのか」を認識することが第一歩です。アプリのB評価時のミス記録・ミス一覧機能は、そのための「<strong class="guide-strong-sm">メタ認知</strong>（自分の理解や癖を客観的に把握すること）」のツールです。自分のミスの傾向が分かれば、同じような場面で「ここは丁寧に」「ここは検算しよう」といった工夫が自然に働くようになり、ミスの減少につながります。テスト直前には、ミス一覧を見直しリストとして活用しましょう。</p>
         </div>
       </div>
 
       <div class="guide-qa-item">
-        <button type="button" class="guide-qa-question" onclick="toggleGuideQA('qa-9')">・このアプリは今後内容を変更していきますか？<span class="guide-qa-arrow" id="arrow-qa-9">▼</span></button>
-        <div class="guide-qa-answer" id="qa-9">
+        <button type="button" class="guide-qa-question" onclick="toggleGuideQA('qa-13')">・このアプリは今後内容を変更していきますか？<span class="guide-qa-arrow" id="arrow-qa-13">▼</span></button>
+        <div class="guide-qa-answer" id="qa-13">
           <p>はい。今後デザインや機能、データの追加・修正を行う可能性があります。より勉強が楽しく捗るような仕組みを現在進行形で考え中です。アップデート情報は適宜ご確認ください（<a href="javascript:void(0)" class="guide-inline-link" onclick="scrollToGuideSection('guide-sec-7')">7.参照</a>）。</p>
         </div>
       </div>
 
       <div class="guide-qa-item">
-        <button type="button" class="guide-qa-question" onclick="toggleGuideQA('qa-10')">・不具合、使いにくい点、要望がありますがどうしたらいいですか？<span class="guide-qa-arrow" id="arrow-qa-10">▼</span></button>
-        <div class="guide-qa-answer" id="qa-10">
+        <button type="button" class="guide-qa-question" onclick="toggleGuideQA('qa-14')">・不具合、使いにくい点、要望がありますがどうしたらいいですか？<span class="guide-qa-arrow" id="arrow-qa-14">▼</span></button>
+        <div class="guide-qa-answer" id="qa-14">
           <p>諸事情によりweb上でやり取りできる仕様にはしていないので、何かあれば担当講師または開発者（井村）に遠慮なくお伝えください。ご意見は吟味した上でできる限り反映します。あえて反映しない場合やできない場合等は、Q＆A欄などに理由を適宜明記するように心がけます。</p>
         </div>
       </div>
@@ -382,7 +410,7 @@
     </div>
   </div>
 
-  <script src="data.js?v=1.0.10"></script>
-  <script src="script.js?v=1.0.10"></script>
+  <script src="data.js?v=1.0.11"></script>
+  <script src="script.js?v=1.0.11"></script>
 </body>
 </html>
