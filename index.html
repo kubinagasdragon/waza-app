@@ -13,7 +13,7 @@
   <meta name="apple-mobile-web-app-title" content="技 完全攻略">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=1.0.11">
+  <link rel="stylesheet" href="style.css?v=1.0.12">
 </head>
 <body>
   <div id="cover-screen" class="cover-screen">
@@ -32,6 +32,8 @@
     <button type="button" class="cover-howto" onclick="showGuideScreen()">使い方ガイドライン <span class="cover-howto-note">（重要）</span></button>
 
     <button type="button" class="achievement-checker-btn" onclick="showAchievementScreen()">学習到達度チェッカー 📊</button>
+
+    <button type="button" class="achievement-checker-btn" onclick="showBigTestScreen()">'26 大テスト対策 🎯</button>
 
     <div class="cover-device-block">
       <div class="cover-device-heading">▼ 機種変更する方へ ▼</div>
@@ -252,6 +254,13 @@
       <p>ただし、この数値はあくまで自分で記録した自己評価をもとにした目安です。一度A評価をつけただけで完全に定着したとは限りません。時間を空けてもう一度解き、本当に自力で再現できるか確かめながら活用してください。</p>
       <p>最後に開いていた学期のタブは自動的に保存され、次回も同じタブから確認できます。演習履歴を追加・編集・削除した場合は、最新の記録をもとに到達度が自動で再計算されます。</p>
 
+      <p class="guide-subhead">○ '26 大テスト対策 🎯</p>
+      <p>ホーム画面の「<a href="javascript:void(0)" class="guide-inline-link" onclick="showBigTestScreen()">'26 大テスト対策 🎯</a>」を開くと、学期ごとの大テストに向けた演習機能を利用できます。</p>
+      <p>「学習カレンダー 📅」は学期タブ（1学期／2学期／3学期）ごとに分かれており、選んだ学期の期間のカレンダーが表示されます。まず「レギュラー講座の曜日」で自分の校舎（姫路校＝月／天王寺校＝水／西北校＝土）を選ぶと、その曜日をもとに各講義日と、講義と講義の間の「演習期間」が自動で表示されます（該当しない場合は「その他」から曜日を直接選べます）。大テストの日は赤、休塾の日はグレーで色分けされます。</p>
+      <p>日付をタップすると、その回の講義内容と、次回講義までにやるべきタスクが確認できます。タスクは基本的に「その週の講義内容の復習」が必須ですが、大テストに向けて何度も復習できるよう他分野の復習内容も推奨表示され、自分用に書き換えたり空欄にしたりして調整できます。編集内容や実際の講義日への変更は自動的に保存され、次回開いたときもそのまま残ります。</p>
+      <p>「全分野弱点ランダム演習 🔥」は、学期タブで対象学期を選び、問題数（5／10／20問）を選ぶと、その学期の対象問題のうち、<strong>過去に一度でも「要復習」になったことがある問題</strong>（現在バッジが外れていても対象）からランダムに出題されます。20問を選べば、大テスト小問集合の模擬テストのような使い方もできます。</p>
+      <p>演習結果はいつも通り記録され、他の画面（演習画面・学習到達度チェッカー）にもそのまま反映されます。「🔄 別の問題セットを出す」を押せば、何度でも新しいセットを作り直せます。</p>
+
       <p class="guide-subhead">○ 機種変更時のデータ書き出し</p>
       <p>演習記録はこの端末（このブラウザ）だけに保存されており、他の端末とは自動で同期されません。機種変更やブラウザの変更をする前に、必ず以下の手順でバックアップを取ってください。</p>
       <ul>
@@ -388,6 +397,83 @@
     </div>
   </div>
 
+  <div id="bigtest-screen" class="app" style="display:none;">
+    <div class="content bigtest-content">
+      <button type="button" class="back-to-cover-btn" onclick="showCoverScreen()">＜ ホーム画面へ</button>
+
+      <h1 class="bigtest-title">'26 大テスト対策 🎯</h1>
+      <p class="bigtest-note">学期ごとの大テストに向けて演習しましょう</p>
+
+      <div class="achievement-tabs" id="bigtest-tabs" role="tablist"></div>
+
+      <div class="bigtest-section">
+        <h2 class="bigtest-section-title">学習カレンダー 📅</h2>
+        <p class="bigtest-section-desc">授業予定と推奨学習計画をカレンダーで確認・編集できます。</p>
+        <button type="button" class="bigtest-calendar-open-btn" onclick="showBigTestCalendarScreen()">カレンダーを開く</button>
+      </div>
+
+      <div class="bigtest-section">
+        <h2 class="bigtest-section-title">全分野弱点ランダム演習 🔥</h2>
+        <p class="bigtest-section-desc">その学期の対象問題のうち、過去に一度でも「要復習」になったことがある問題からランダムに出題します。</p>
+        <div class="bigtest-count-buttons">
+          <button type="button" class="bigtest-count-btn" onclick="startBigTestRandomPractice(5)">5問</button>
+          <button type="button" class="bigtest-count-btn" onclick="startBigTestRandomPractice(10)">10問</button>
+          <button type="button" class="bigtest-count-btn" onclick="startBigTestRandomPractice(20)">20問</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="bigtest-random-screen" class="app" style="display:none;">
+    <div class="content bigtest-content">
+      <button type="button" class="back-to-cover-btn" onclick="showBigTestScreen()">＜ '26 大テスト対策へ</button>
+
+      <h1 class="bigtest-title">全分野弱点ランダム演習 🔥</h1>
+      <p class="bigtest-note" id="bigtest-random-meta"></p>
+      <button type="button" class="bigtest-regenerate-btn" onclick="regenerateBigTestRandomPractice()">🔄 別の問題セットを出す</button>
+
+      <div id="bigtest-random-list"></div>
+    </div>
+  </div>
+
+  <div id="bigtest-calendar-screen" class="app" style="display:none;">
+    <div class="content bigtest-content">
+      <button type="button" class="back-to-cover-btn" onclick="showBigTestScreen()">＜ '26 大テスト対策へ</button>
+
+      <h1 class="bigtest-title">学習カレンダー 📅</h1>
+      <p class="calendar-usage-note">📖 使い方：まずレギュラー講座の校舎（曜日）を選ぶと、各講義日と、講義間の「演習期間」が自動で表示されます。各講義日をタップすると、その回の講義内容と、次回講義までにやるべきタスクが確認できます。タスクは基本的に「その週の講義内容の復習」が必須ですが、大テストに向けて何度も復習できるよう他分野の復習も推奨表示されます。推奨内容は自分で確認・編集できますので、自分に合った復習スケジュールを立てることができます。</p>
+
+      <div class="calendar-weekday-setting">
+        <p class="calendar-weekday-label">レギュラー講座の曜日</p>
+        <div class="calendar-weekday-presets" id="calendar-weekday-presets"></div>
+        <select id="calendar-weekday-custom" class="calendar-weekday-select" onchange="selectBigTestWeekdayCustom(this.value)" style="display:none;"></select>
+      </div>
+
+      <div class="calendar-nav">
+        <button type="button" class="calendar-nav-btn" id="calendar-nav-prev" onclick="shiftCalendarMonth(-1)">＜</button>
+        <span class="calendar-month-label" id="calendar-month-label"></span>
+        <button type="button" class="calendar-nav-btn" id="calendar-nav-next" onclick="shiftCalendarMonth(1)">＞</button>
+      </div>
+
+      <p class="calendar-empty-note" id="calendar-empty-note" style="display:none;">この学期の学習計画は、現在準備中です。</p>
+
+      <div class="calendar-weekday-header">
+        <span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span>
+      </div>
+      <div class="calendar-grid" id="calendar-grid"></div>
+    </div>
+  </div>
+
+  <div id="calendar-day-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-card">
+      <div class="modal-header-row">
+        <h3 id="calendar-day-modal-title"></h3>
+        <button type="button" class="modal-close-x" onclick="closeCalendarDayModal()" aria-label="閉じる">✕</button>
+      </div>
+      <div id="calendar-day-modal-body"></div>
+    </div>
+  </div>
+
   <div id="mistake-modal" class="modal-overlay" style="display:none;">
     <div class="modal-card">
       <h3>ミス内容を選択してください（複数選択可）</h3>
@@ -410,7 +496,7 @@
     </div>
   </div>
 
-  <script src="data.js?v=1.0.11"></script>
-  <script src="script.js?v=1.0.11"></script>
+  <script src="data.js?v=1.0.12"></script>
+  <script src="script.js?v=1.0.12"></script>
 </body>
 </html>
