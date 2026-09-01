@@ -6,6 +6,24 @@ body {
   color: #f1f5f9;
 }
 
+/* タップ時にブラウザ標準のハイライト（枠線・一瞬の白っぽいフラッシュ）が出るのを防ぐ。
+   選択状態などの見た目はそれぞれのボタン独自のスタイル（.selected 等）で表現している */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a {
+  outline: none;
+}
+
+button:focus,
+a:focus,
+button:focus-visible,
+a:focus-visible {
+  outline: none;
+}
+
 .app {
   max-width: 390px;
   width: 100%;

@@ -1,6 +1,14 @@
 // アプリの更新履歴（コミット・プッシュのたびに先頭に新しいバージョンを追加する）
 const CHANGELOG = [
   {
+    version: "1.0.13",
+    date: "2026-09-01",
+    changes: [
+      "学習カレンダーで、休塾の日を開いたときにタイトルが「第undefined講」になっていたのを「休塾」に修正",
+      "ボタンなどをタップした際に、枠線が付いたり一瞬白っぽくフラッシュしたりする表示を修正",
+    ],
+  },
+  {
     version: "1.0.12",
     date: "2026-09-01",
     changes: [
@@ -909,7 +917,8 @@ function getLectureNumberMap(termKey) {
 // 大テストの回は「大テスト」、夏期・冬期講習の回は「第14講(冬期第1講)」のように通し番号＋元の名称を併記し、
 // 通常回は「第1講」のように通し番号だけを表示する
 function formatLectureLabel(week, lectureNumber) {
-  if (week.content && week.content.includes("大テスト")) return "大テスト";
+  if (!week.content) return "休塾"; // 休塾は講数を持たないので、講数表示はしない
+  if (week.content.includes("大テスト")) return "大テスト";
   const isSpecialSession = /^(夏期|冬期)/.test(week.lecture);
   const shortLabel = `第${lectureNumber}講`;
   return isSpecialSession ? `${shortLabel}(${week.lecture})` : shortLabel;
