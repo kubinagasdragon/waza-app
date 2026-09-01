@@ -1,6 +1,13 @@
 // アプリの更新履歴（コミット・プッシュのたびに先頭に新しいバージョンを追加する）
 const CHANGELOG = [
   {
+    version: "1.0.14",
+    date: "2026-09-01",
+    changes: [
+      "休塾日に講義の日付を変更した場合、カレンダー上も休塾ではなく講義（第○講）が優先して表示されるように修正",
+    ],
+  },
+  {
     version: "1.0.13",
     date: "2026-09-01",
     changes: [
@@ -1175,9 +1182,15 @@ function renderBigTestCalendar() {
   }
   emptyNote.style.display = "none";
 
+  // 日付変更によって、休塾の日と講義の日が同じ日になることがある（例：休塾日に講義を移動した場合）。
+  // その場合はカレンダー上も休塾を「なかったこと」にして、実際の講義（第○講）を優先して表示する
   const eventsByDate = {};
   weeks.forEach(week => {
-    eventsByDate[formatDateKey(resolveDisplayDate(week, weekday, overrides))] = week;
+    const key = formatDateKey(resolveDisplayDate(week, weekday, overrides));
+    const existing = eventsByDate[key];
+    if (!existing || (!existing.content && week.content)) {
+      eventsByDate[key] = week;
+    }
   });
 
   const practicePeriods = computeBigTestPracticePeriods(weeks, weekday, overrides);
@@ -1310,7 +1323,9 @@ function openCalendarDayModal(dateKey) {
   const overrides = loadBigTestOverrides();
   const weeks = getBigTestWeeksForTerm(currentBigTestTerm);
 
-  const week = weeks.find(w => formatDateKey(resolveDisplayDate(w, weekday, overrides)) === dateKey);
+  // 日付変更で休塾と講義が同じ日になった場合は、休塾より実際の講義を優先する（カレンダー表示と揃える）
+  const candidates = weeks.filter(w => formatDateKey(resolveDisplayDate(w, weekday, overrides)) === dateKey);
+  const week = candidates.find(w => w.content) || candidates[0];
   if (!week) return;
 
   const override = overrides[week.weekStart] || {};
