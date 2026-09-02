@@ -13,7 +13,7 @@
   <meta name="apple-mobile-web-app-title" content="技 完全攻略">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=1.0.15">
+  <link rel="stylesheet" href="style.css?v=1.0.16">
 </head>
 <body>
   <div id="cover-screen" class="cover-screen">
@@ -251,6 +251,7 @@
       <p>A：5点　B：4点　C：3点　D：2点　E：1点　未演習：0点</p>
       <p>すべての対象問題がA評価の場合を100%として、章ごとの到達度を表示します。複数回演習した問題については、過去の平均や最高評価ではなく、最後につけた自己評価が反映されます。</p>
       <p>なお、「<a href="javascript:void(0)" class="guide-inline-link" onclick="scrollToGuideSection('guide-sec-4')">要復習</a>」バッジがついたままA・Bをつけた場合は、その評価をそのまま反映せず、C評価として点数計算します。バッジは、A・B評価が2回連続で出るまで外れない仕様になっているため、1回良い評価がついただけで満点評価にしないための措置です。バッジが外れて初めて、A・Bの評価がそのまま反映されます。</p>
+      <p>バーをタップすると、その章（または全範囲）の問題が現在A〜E・未演習それぞれ何問あるかを確認できます。こちらは上記の点数計算とは異なり、今つけている自己評価をそのまま単純に集計したものです。</p>
       <p>ただし、この数値はあくまで自分で記録した自己評価をもとにした目安です。一度A評価をつけただけで完全に定着したとは限りません。時間を空けてもう一度解き、本当に自力で再現できるか確かめながら活用してください。</p>
       <p>最後に開いていた学期のタブは自動的に保存され、次回も同じタブから確認できます。演習履歴を追加・編集・削除した場合は、最新の記録をもとに到達度が自動で再計算されます。</p>
 
@@ -390,7 +391,8 @@
       <button type="button" class="back-to-cover-btn" onclick="showCoverScreen()">＜ ホーム画面へ</button>
 
       <h1 class="achievement-title">学習到達度チェッカー 📊</h1>
-      <p class="achievement-note">各章の最新の自己評価から算出しています</p>
+      <p class="achievement-note">各章の最新の自己評価から「到達度」を算出しています</p>
+      <p class="achievement-note">バーをタップすると、A〜E・未演習の問題数を確認できます</p>
 
       <div class="achievement-tabs" id="achievement-tabs" role="tablist"></div>
 
@@ -519,7 +521,7 @@
     </div>
   </div>
 
-  <script src="data.js?v=1.0.15"></script>
-  <script src="script.js?v=1.0.15"></script>
+  <script src="data.js?v=1.0.16"></script>
+  <script src="script.js?v=1.0.16"></script>
 </body>
 </html>

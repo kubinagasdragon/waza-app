@@ -1,6 +1,14 @@
 // アプリの更新履歴（コミット・プッシュのたびに先頭に新しいバージョンを追加する）
 const CHANGELOG = [
   {
+    version: "1.0.16",
+    date: "2026-09-01",
+    changes: [
+      "学習到達度チェッカーのバーをタップすると、A〜E・未演習の問題数が色分け表示・数値で確認できるように変更（タップするまでは、これまで通りの表示）",
+      "タップ時のランクの色をA〜Eの自己評価ボタンと統一し、未演習はグレーで表示",
+    ],
+  },
+  {
     version: "1.0.15",
     date: "2026-09-01",
     changes: [
@@ -497,6 +505,50 @@ function calculateChapterAchievement(chapterRef, maxLevel, records) {
   return { chapterRef, eligibleCount, totalScore, maxScore, percentage, isPerfect };
 }
 
+const ACHIEVEMENT_RANKS = ["A", "B", "C", "D", "E", "none"];
+
+// 章ごとのランク内訳（A〜E・未演習）を計算する。到達度スコア（calculateChapterAchievement）と違い、
+// 「一度でもC〜EならA/Bをつけても据え置き」という仕様は考慮せず、今つけている最新の自己評価だけで単純に分類する
+function calculateChapterRankDistribution(chapterRef, maxLevel, records) {
+  const chapter = problemBank[chapterRef];
+  const eligibleProblems = chapter.problems.filter(p => p.level <= maxLevel);
+  const counts = { A: 0, B: 0, C: 0, D: 0, E: 0, none: 0 };
+
+  eligibleProblems.forEach(p => {
+    const key = `${chapterRef}_${p.number}`;
+    const history = Array.isArray(records[key]) ? records[key] : [];
+    const latest = history[history.length - 1];
+    if (latest && ACHIEVEMENT_RANKS.includes(latest.evaluation)) {
+      counts[latest.evaluation] += 1;
+    } else {
+      counts.none += 1;
+    }
+  });
+
+  return summarizeRankCounts(counts);
+}
+
+// 複数章分のランク別カウントを合算する（学期全体の内訳に使う）
+function summarizeRankCounts(counts) {
+  const total = ACHIEVEMENT_RANKS.reduce((sum, rank) => sum + counts[rank], 0);
+  const percentages = {};
+  ACHIEVEMENT_RANKS.forEach(rank => {
+    percentages[rank] = total > 0 ? Math.round((counts[rank] / total) * 100) : 0;
+  });
+  return { counts, percentages, total };
+}
+
+function calculateTermRankDistribution(chapterRefs, maxLevel, records) {
+  const counts = { A: 0, B: 0, C: 0, D: 0, E: 0, none: 0 };
+  chapterRefs.forEach(chapterRef => {
+    const result = calculateChapterRankDistribution(chapterRef, maxLevel, records);
+    ACHIEVEMENT_RANKS.forEach(rank => {
+      counts[rank] += result.counts[rank];
+    });
+  });
+  return summarizeRankCounts(counts);
+}
+
 // 学期全体（表示中の全章合算）の到達度を計算する（副作用なし）
 function calculateTermAchievement(chapterRefs, maxLevel, records) {
   let totalScore = 0;
@@ -550,6 +602,40 @@ function renderAchievementTabs() {
 }
 
 // 選択中の学期の棒グラフを描画する（毎回演習履歴を読み直して最新状態で計算する）
+const ACHIEVEMENT_RANK_LABELS = { A: "A", B: "B", C: "C", D: "D", E: "E", none: "未演習" };
+
+// ランク内訳を、バー内の色分けされたセグメントとして描画する
+function renderAchievementRankSegments(distribution) {
+  return ACHIEVEMENT_RANKS.map(
+    rank => `<div class="achievement-bar-segment rank-${rank}" style="width: ${distribution.percentages[rank]}%;"></div>`
+  ).join("");
+}
+
+// ランク内訳を、タップで開く数値の一覧として描画する
+function renderAchievementRankBreakdown(distribution) {
+  return ACHIEVEMENT_RANKS.map(
+    rank => `
+      <span class="achievement-breakdown-item">
+        <span class="achievement-breakdown-dot rank-${rank}"></span>${ACHIEVEMENT_RANK_LABELS[rank]}: ${distribution.counts[rank]}問
+      </span>
+    `
+  ).join("");
+}
+
+// ランク内訳の表示・非表示切り替え（▼▲の矢印も連動して切り替える）
+function toggleAchievementBreakdown(id) {
+  const fill = document.getElementById(`achievement-fill-${id}`);
+  const segments = document.getElementById(`achievement-segments-${id}`);
+  const box = document.getElementById(`achievement-breakdown-${id}`);
+  const arrow = document.getElementById(`achievement-arrow-${id}`);
+  if (!box) return;
+  const isOpen = box.style.display === "flex";
+  box.style.display = isOpen ? "none" : "flex";
+  fill.style.display = isOpen ? "block" : "none";
+  segments.style.display = isOpen ? "none" : "flex";
+  if (arrow) arrow.textContent = isOpen ? "▼" : "▲";
+}
+
 function renderAchievementChart() {
   const container = document.getElementById("achievement-chart");
   const config = ACHIEVEMENT_TERM_CONFIG[currentAchievementTerm];
@@ -559,41 +645,56 @@ function renderAchievementChart() {
   const iaChapterRefs = chapterRefs.filter(ref => ref.startsWith("1a-"));
   const iibChapterRefs = chapterRefs.filter(ref => ref.startsWith("2b-"));
 
-  function renderRow(chapterRef) {
+  function renderRow(chapterRef, id, groupClass) {
     const result = calculateChapterAchievement(chapterRef, config.maxLevel, records);
+    const distribution = calculateChapterRankDistribution(chapterRef, config.maxLevel, records);
     const title = formatAchievementChapterTitle(chapterRef);
-    const groupClass = chapterRef.startsWith("1a-") ? "ia" : "iib";
-    const fillClass = result.isPerfect ? "achievement-bar-fill perfect" : `achievement-bar-fill ${groupClass}`;
     const percentClass = result.isPerfect ? "achievement-percent perfect" : "achievement-percent";
+    const fillClass = result.isPerfect ? "perfect" : groupClass;
 
     return `
       <div class="achievement-row">
         <div class="achievement-row-title">${title}</div>
-        <div class="achievement-row-bar-wrap">
-          <div class="achievement-bar-track" role="img" aria-label="${title} 到達度${result.percentage}%">
-            <div class="${fillClass}" style="width: ${result.percentage}%;"></div>
+        <div class="achievement-row-bar-wrap" onclick="toggleAchievementBreakdown('${id}')">
+          <div class="achievement-bar-track" aria-label="${title} 到達度${result.percentage}%">
+            <div class="achievement-bar-fill ${fillClass}" id="achievement-fill-${id}" style="width: ${result.percentage}%;"></div>
+            <div class="achievement-bar-segments" id="achievement-segments-${id}" style="display: none;">
+              ${renderAchievementRankSegments(distribution)}
+            </div>
           </div>
           <div class="${percentClass}">${result.percentage}%</div>
+          <span class="achievement-toggle-arrow" id="achievement-arrow-${id}">▼</span>
+        </div>
+        <div class="achievement-breakdown" id="achievement-breakdown-${id}">
+          ${renderAchievementRankBreakdown(distribution)}
         </div>
       </div>
     `;
   }
 
-  const iaHtml = iaChapterRefs.map(renderRow).join("");
-  const iibHtml = iibChapterRefs.map(renderRow).join("");
+  const iaHtml = iaChapterRefs.map(ref => renderRow(ref, ref, "ia")).join("");
+  const iibHtml = iibChapterRefs.map(ref => renderRow(ref, ref, "iib")).join("");
 
   const totalResult = calculateTermAchievement(chapterRefs, config.maxLevel, records);
+  const totalDistribution = calculateTermRankDistribution(chapterRefs, config.maxLevel, records);
   const totalTitle = currentAchievementTerm === "term3" ? "技ⅠA・ⅡB 全問題" : `${config.termNumber}学期全範囲`;
-  const totalFillClass = totalResult.isPerfect ? "achievement-bar-fill perfect" : "achievement-bar-fill total";
   const totalPercentClass = totalResult.isPerfect ? "achievement-percent perfect" : "achievement-percent";
+  const totalFillClass = totalResult.isPerfect ? "perfect" : "total";
   const totalHtml = `
     <div class="achievement-row achievement-total-row">
       <div class="achievement-row-title">${totalTitle}</div>
-      <div class="achievement-row-bar-wrap">
-        <div class="achievement-bar-track" role="img" aria-label="${totalTitle} 到達度${totalResult.percentage}%">
-          <div class="${totalFillClass}" style="width: ${totalResult.percentage}%;"></div>
+      <div class="achievement-row-bar-wrap" onclick="toggleAchievementBreakdown('total')">
+        <div class="achievement-bar-track" aria-label="${totalTitle} 到達度${totalResult.percentage}%">
+          <div class="achievement-bar-fill ${totalFillClass}" id="achievement-fill-total" style="width: ${totalResult.percentage}%;"></div>
+          <div class="achievement-bar-segments" id="achievement-segments-total" style="display: none;">
+            ${renderAchievementRankSegments(totalDistribution)}
+          </div>
         </div>
         <div class="${totalPercentClass}">${totalResult.percentage}%</div>
+        <span class="achievement-toggle-arrow" id="achievement-arrow-total">▼</span>
+      </div>
+      <div class="achievement-breakdown" id="achievement-breakdown-total">
+        ${renderAchievementRankBreakdown(totalDistribution)}
       </div>
     </div>
   `;

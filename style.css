@@ -1108,7 +1108,11 @@ button {
   text-align: center;
   font-size: 11px;
   color: #7f8ba3;
-  margin: 0 0 18px;
+  margin: 0 0 2px;
+}
+
+.achievement-note:last-of-type {
+  margin-bottom: 18px;
 }
 
 .achievement-tabs {
@@ -1202,6 +1206,7 @@ button {
   display: flex;
   align-items: center;
   gap: 8px;
+  cursor: pointer;
 }
 
 .achievement-bar-track {
@@ -1217,12 +1222,6 @@ button {
   height: 100%;
   border-radius: 999px;
   transition: width 0.4s ease;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .achievement-bar-fill {
-    transition: none;
-  }
 }
 
 .achievement-bar-fill.ia {
@@ -1242,9 +1241,59 @@ button {
   box-shadow: 0 0 6px rgba(230, 185, 61, 0.35);
 }
 
+/* タップすると、通常の到達度バー（.achievement-bar-fill）の代わりにこちらを表示する */
+.achievement-bar-segments {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.achievement-bar-segment {
+  height: 100%;
+  transition: width 0.4s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .achievement-bar-fill,
+  .achievement-bar-segment {
+    transition: none;
+  }
+}
+
+/* ランク別の色は、自己評価ボタン（.eval-X.selected）と統一。未演習はグレーで区別する */
+.achievement-bar-segment.rank-A,
+.achievement-breakdown-dot.rank-A {
+  background: #22c55e;
+}
+
+.achievement-bar-segment.rank-B,
+.achievement-breakdown-dot.rank-B {
+  background: #d6a80f;
+}
+
+.achievement-bar-segment.rank-C,
+.achievement-breakdown-dot.rank-C {
+  background: #f97316;
+}
+
+.achievement-bar-segment.rank-D,
+.achievement-breakdown-dot.rank-D {
+  background: #ef4444;
+}
+
+.achievement-bar-segment.rank-E,
+.achievement-breakdown-dot.rank-E {
+  background: #a855f7;
+}
+
+.achievement-bar-segment.rank-none,
+.achievement-breakdown-dot.rank-none {
+  background: #6b7280;
+}
+
 .achievement-percent {
   flex-shrink: 0;
-  width: 44px;
+  width: 40px;
   text-align: right;
   font-size: 12px;
   font-weight: 700;
@@ -1253,6 +1302,38 @@ button {
 
 .achievement-percent.perfect {
   color: #e6b93d;
+}
+
+.achievement-toggle-arrow {
+  flex-shrink: 0;
+  font-size: 9px;
+  color: #7f8ba3;
+}
+
+.achievement-breakdown {
+  display: none;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: #1b2536;
+  border-radius: 8px;
+  font-size: 11px;
+  color: #cbd5e1;
+}
+
+.achievement-breakdown-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.achievement-breakdown-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
 }
 
 /* ===== 大テスト対策画面 ===== */
