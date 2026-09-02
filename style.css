@@ -615,7 +615,7 @@ button {
 }
 
 .checkpoint-visible {
-  margin-top: 10px;
+  margin: 10px 0 8px;
   padding: 10px;
   background-color: #26314a;
   border-left: 4px solid #3b82f6;

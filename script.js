@@ -1,6 +1,17 @@
 // アプリの更新履歴（コミット・プッシュのたびに先頭に新しいバージョンを追加する）
 const CHANGELOG = [
   {
+    version: "1.0.15",
+    date: "2026-09-01",
+    changes: [
+      "「'26 大テスト対策」に「全分野CheckPointおさらい 👀」を追加。その学期の全対象問題からCheck Pointの質問をランダムに出題（5／10／20問、出題順はⅠA第1章→ⅡB第9章の順・同一章内は問題番号順）。自己評価はつけられず、演習記録の確認のみできる",
+      "使い方ガイドラインに「全分野CheckPointおさらい」の説明を追加",
+      "全分野CheckPointおさらいのCheck Point欄と「未演習▼」表示の間隔を調整",
+      "全分野弱点ランダム演習・全分野CheckPointおさらいの対象範囲を、学期ごとの実際の大テスト範囲に合わせて調整",
+      "全分野弱点ランダム演習の対象を、要復習の問題に加えて未演習の問題も含むように変更",
+    ],
+  },
+  {
     version: "1.0.14",
     date: "2026-09-01",
     changes: [
@@ -317,6 +328,7 @@ const ALL_SCREEN_IDS = [
   "achievement-screen",
   "bigtest-screen",
   "bigtest-random-screen",
+  "bigtest-checkpoint-screen",
   "bigtest-calendar-screen",
 ];
 
@@ -597,6 +609,7 @@ function renderAchievementChart() {
 
 const BIGTEST_TERM_STORAGE_KEY = "bigtestSelectedTerm";
 const BIGTEST_RANDOM_SESSION_KEY = "bigtestRandomSession";
+const BIGTEST_CHECKPOINT_SESSION_KEY = "bigtestCheckpointSession";
 const BIGTEST_RANDOM_COUNTS = [5, 10, 20];
 
 let currentBigTestTerm = "term1";
@@ -638,12 +651,31 @@ function everHadReview(history) {
   return history.some(record => ["C", "D", "E"].includes(record.evaluation));
 }
 
-// 「全分野弱点ランダム演習」の対象プール：その学期の対象問題のうち、過去に一度でもC〜Eがついたことがある問題
+// '26 大テスト対策（全分野弱点ランダム演習・全分野CheckPointおさらい）で対象から除外する章を学期ごとに定義する。
+// 学習到達度チェッカーの学期別対象章（レベル別の到達度トラッキング用）とは目的が異なり、
+// 「実際にその学期の大テストの範囲になっている章」だけに絞るためのもの
+const BIGTEST_SCOPE_EXCLUDED_CHAPTERS = {
+  // 1学期：到達度チェッカーの対象章から、さらに「数列」を大テスト範囲外として除外
+  term1: ["2b-7"],
+  // 2学期：到達度チェッカーの対象章から、「データの分析」を大テスト範囲外として除外
+  term2: ["1a-4"],
+  // 3学期：到達度チェッカーは全章を対象にしているが、実際の宿題範囲はそもそも「基盤」「データの分析」を含まない。
+  // さらにその宿題範囲から「確率分布と統計」「三角比・図形」を大テスト範囲外として除外する
+  term3: ["1a-1", "2b-1", "1a-4", "2b-8", "1a-5"],
+};
+
+function getBigTestEligibleProblemsForTerm(termKey) {
+  const excluded = BIGTEST_SCOPE_EXCLUDED_CHAPTERS[termKey] || [];
+  return getEligibleProblemsForTerm(termKey).filter(p => !excluded.includes(p.chapterRef));
+}
+
+// 「全分野弱点ランダム演習」の対象プール：大テストの範囲の問題のうち、
+// 過去に一度でもC〜Eがついたことがある問題、または一度も演習していない問題
 function getWeaknessPoolForTerm(termKey) {
   const records = loadRecords();
-  return getEligibleProblemsForTerm(termKey).filter(p => {
+  return getBigTestEligibleProblemsForTerm(termKey).filter(p => {
     const history = records[`${p.chapterRef}_${p.number}`] || [];
-    return everHadReview(history);
+    return history.length === 0 || everHadReview(history);
   });
 }
 
@@ -749,7 +781,7 @@ function renderBigTestRandomList() {
 
   if (!session || session.problems.length === 0) {
     meta.textContent = "";
-    container.innerHTML = "<p>対象となる問題（過去に一度でも「要復習」になったことがある問題）が見つかりませんでした。演習を重ねてからもう一度試してみてください。</p>";
+    container.innerHTML = "<p>対象となる問題（要復習・未演習の問題）が見つかりませんでした。</p>";
     return;
   }
 
@@ -834,6 +866,121 @@ function handleBigTestEvaluationClick(index, evaluation) {
     return;
   }
   saveEvaluation(problem, evaluation, null);
+}
+
+// ===== 全分野CheckPointおさらい =====
+// 仕様はランダム演習と同じ（出題内容はランダム・表示順は章順、章内は問題番号順）で、
+// 対象プールが「弱点のみ」ではなく「その学期の全対象問題」である点だけが異なる
+
+// 新しいCheckPointおさらいセットを作り、localStorageに保存する
+function generateBigTestCheckpointSet(termKey, count) {
+  const pool = getBigTestEligibleProblemsForTerm(termKey);
+  const picked = shuffleArray(pool)
+    .slice(0, count)
+    .sort((a, b) => compareChapterRef(a.chapterRef, b.chapterRef) || a.number - b.number);
+  const session = {
+    termKey,
+    count,
+    problems: picked.map(p => ({ chapterRef: p.chapterRef, number: p.number })),
+  };
+  localStorage.setItem(BIGTEST_CHECKPOINT_SESSION_KEY, JSON.stringify(session));
+  return session;
+}
+
+function loadBigTestCheckpointSession() {
+  const raw = localStorage.getItem(BIGTEST_CHECKPOINT_SESSION_KEY);
+  return raw ? JSON.parse(raw) : null;
+}
+
+// 問題数を選んでCheckPointおさらいを開始する
+function startBigTestCheckpointPractice(count) {
+  generateBigTestCheckpointSet(currentBigTestTerm, count);
+  showBigTestCheckpointScreen();
+}
+
+// 同じ学期・同じ問題数の条件で、セットを新しく作り直す
+function regenerateBigTestCheckpointPractice() {
+  const session = loadBigTestCheckpointSession();
+  const count = session ? session.count : BIGTEST_RANDOM_COUNTS[1];
+  generateBigTestCheckpointSet(currentBigTestTerm, count);
+  renderBigTestCheckpointList();
+}
+
+// 全分野CheckPointおさらいの画面を表示する
+function showBigTestCheckpointScreen() {
+  hideAllScreens();
+  document.getElementById("bigtest-checkpoint-screen").style.display = "block";
+  renderBigTestCheckpointList();
+  window.scrollTo(0, 0);
+}
+
+// CheckPointおさらいの問題一覧を描画する（ランダム演習のカード表示を流用しつつ、
+// Check Pointは最初から開いた状態で表示する）
+function renderBigTestCheckpointList() {
+  const session = loadBigTestCheckpointSession();
+  const container = document.getElementById("bigtest-checkpoint-list");
+  const meta = document.getElementById("bigtest-checkpoint-meta");
+  const records = loadRecords();
+
+  if (!session || session.problems.length === 0) {
+    meta.textContent = "";
+    container.innerHTML = "<p>対象となる問題が見つかりませんでした。</p>";
+    return;
+  }
+
+  const config = ACHIEVEMENT_TERM_CONFIG[session.termKey];
+  meta.textContent = `${config.label}・${session.problems.length}問`;
+
+  container.innerHTML = "";
+  session.problems.forEach(ref => {
+    const chapterData = problemBank[ref.chapterRef];
+    const problemData = chapterData ? chapterData.problems.find(p => p.number === ref.number) : null;
+    if (!problemData) return; // データが変わっていた場合は安全にスキップ
+
+    const problem = {
+      chapterRef: ref.chapterRef,
+      number: problemData.number,
+      level: problemData.level,
+      checkPoint: problemData.checkPoint,
+    };
+    const key = recordKey(problem);
+    const history = records[key] || [];
+    const latest = history[history.length - 1];
+    const chapterLabel = formatAchievementChapterTitle(ref.chapterRef);
+    const historyBoxId = "bigtest-checkpoint-history-" + key;
+
+    const historyEntries = history
+      .slice()
+      .reverse()
+      .map(r => `
+        <div class="history-entry">
+          <span class="history-eval">${r.evaluation}</span>
+          <span class="history-date">${formatDate(r.date)}</span>
+          ${r.evaluation === "B" ? `<div class="history-mistake">ミス: ${r.mistake || "（未記入）"}</div>` : ""}
+        </div>
+      `)
+      .join("");
+
+    const item = document.createElement("div");
+    item.className = "problem-item";
+    item.innerHTML = `
+      <div class="problem-header">
+        <span class="bigtest-chapter-label">${chapterLabel}</span>
+        <span class="problem-number">${problem.number}</span>
+        <span class="problem-level">Lv${problem.level}</span>
+        ${needsReview(history) ? '<span class="review-badge">要復習</span>' : ""}
+      </div>
+      <div class="checkpoint-visible">${problem.checkPoint}</div>
+      <div class="last-record" onclick="toggleHistoryBox('${historyBoxId}', 'arrow-${historyBoxId}')">
+        <span>${latest ? `最新評価: ${latest.evaluation}（${formatDate(latest.date)}）` : "未演習"}</span>
+        <span class="dropdown-arrow" id="arrow-${historyBoxId}">▼</span>
+      </div>
+      <div id="${historyBoxId}" class="history-list">
+        ${history.length > 0 ? historyEntries : "<p>まだ記録がありません。</p>"}
+      </div>
+    `;
+    container.appendChild(item);
+  });
 }
 
 // ===== 学習カレンダー =====
@@ -1509,6 +1656,7 @@ function saveEvaluation(problem, evaluation, mistake) {
   saveRecords(records);
 
   // 評価をつけた画面（メイン演習画面／大テスト対策のランダム演習画面）に応じて再描画する
+  // ※CheckPointおさらい画面は評価不可（記録の閲覧のみ）のため、ここでは再描画しない
   if (document.getElementById("bigtest-random-screen").style.display !== "none") {
     renderBigTestRandomList();
   } else {
@@ -1869,6 +2017,7 @@ function showView(view) {
     "achievement-screen": showCoverScreen,
     "bigtest-screen": showCoverScreen,
     "bigtest-random-screen": showBigTestScreen,
+    "bigtest-checkpoint-screen": showBigTestScreen,
     "bigtest-calendar-screen": showBigTestScreen,
   };
 
