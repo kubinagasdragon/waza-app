@@ -1,6 +1,16 @@
 // アプリの更新履歴（コミット・プッシュのたびに先頭に新しいバージョンを追加する）
 const CHANGELOG = [
   {
+    version: "1.0.17",
+    date: "2026-09-02",
+    changes: [
+      "ホーム画面に「ミス分析 📉」を追加。全学期・全分野のミス記録から「単元別ミスランキング」「ミス問題ランキング」「ミスの内訳分析」を確認できる",
+      "「気づきノート 📝」を追加。ミスを減らすために気づいたことを、付箋のように日付とともに書き残せる",
+      "使い方ガイドラインに「ミス分析」の説明を追加",
+      "ミス分析の順位カードの章タイトルを「技ⅠA 第8章／整数」のように2行で統一。問題番号も「No.1」から、他の画面と同じ四角囲みの表示に統一",
+    ],
+  },
+  {
     version: "1.0.16",
     date: "2026-09-01",
     changes: [
@@ -338,6 +348,8 @@ const ALL_SCREEN_IDS = [
   "bigtest-random-screen",
   "bigtest-checkpoint-screen",
   "bigtest-calendar-screen",
+  "mistake-analysis-screen",
+  "mistake-notes-screen",
 ];
 
 function hideAllScreens() {
@@ -465,6 +477,15 @@ function formatAchievementChapterTitle(chapterRef) {
   const match = converted.match(/^(.*)（(.+)）$/);
   if (!match) return converted;
   return `${match[1]} ${match[2]}`;
+}
+
+// 章タイトルを、「技ⅠA 第8章」「整数」で改行される2行のHTMLとして返す（ミス分析の順位カード用）
+function formatAchievementChapterTitleHtml(chapterRef) {
+  const rawTitle = problemBank[chapterRef].title;
+  const converted = rawTitle.replace("技1A", "技ⅠA").replace("技2B", "技ⅡB");
+  const match = converted.match(/^(.*)（(.+)）$/);
+  if (!match) return converted;
+  return `${match[1]}<br>${match[2]}`;
 }
 
 // 問題1問の得点（未演習・不正な評価値は0点。最後につけた自己評価だけを使う）
@@ -704,6 +725,319 @@ function renderAchievementChart() {
     ${iibChapterRefs.length > 0 ? `<p class="achievement-group-heading">技ⅡB</p>${iibHtml}` : ""}
     ${totalHtml}
   `;
+}
+
+// ===== ミス分析 =====
+// 「ミス内容」はB評価（ミスはあったがほぼ解けてた）を選んだときにしか記録されない仕様のため、
+// このミス分析も対象はB評価の記録に限られる（C〜Eはミス内容を記録していない）
+
+// 全学期・全章を対象に、これまでのB評価＋ミス内容の記録を1件ずつフラットに集める
+function getAllMistakeEntries() {
+  const records = loadRecords();
+  const entries = [];
+  Object.keys(problemBank).forEach(chapterRef => {
+    problemBank[chapterRef].problems.forEach(p => {
+      const key = `${chapterRef}_${p.number}`;
+      const history = records[key] || [];
+      history.forEach(record => {
+        if (record.evaluation === "B" && record.mistake) {
+          entries.push({ chapterRef, number: p.number, date: record.date, mistake: record.mistake });
+        }
+      });
+    });
+  });
+  return entries;
+}
+
+// 章ごとのミス回数ランキングを作る
+function getChapterMistakeRanking() {
+  const counts = {};
+  getAllMistakeEntries().forEach(e => {
+    counts[e.chapterRef] = (counts[e.chapterRef] || 0) + 1;
+  });
+  return Object.keys(counts)
+    .map(chapterRef => ({ chapterRef, count: counts[chapterRef] }))
+    .sort((a, b) => b.count - a.count || compareChapterRef(a.chapterRef, b.chapterRef));
+}
+
+// 問題ごとのミス回数ランキングを作る（2回以上ミスした問題のみ対象）
+function getProblemMistakeRanking() {
+  const counts = {};
+  getAllMistakeEntries().forEach(e => {
+    const key = `${e.chapterRef}_${e.number}`;
+    if (!counts[key]) counts[key] = { chapterRef: e.chapterRef, number: e.number, count: 0 };
+    counts[key].count += 1;
+  });
+  return Object.values(counts)
+    .filter(item => item.count >= 2)
+    .sort((a, b) => b.count - a.count || compareChapterRef(a.chapterRef, b.chapterRef) || a.number - b.number);
+}
+
+// ミス内容の内訳（定型13種の回数＋「その他」自由記入の一覧）を作る
+function getMistakeBreakdown() {
+  // ミス内容の文字列は「選択した定型ミス（を「、」で連結） + その他: 自由記述」という形で保存されているが、
+  // 定型ミスの選択肢自体に「、」を含むものがある（例：「符号（マイナスの分配、移項など）」）ため、
+  // 単純に「、」で分割すると壊れてしまう。そのため、各定型ミスが文字列に含まれているかで判定する
+  const categoryCounts = {};
+  MISTAKE_CATEGORIES.forEach(c => {
+    categoryCounts[c] = 0;
+  });
+  const freeTextEntries = [];
+  const otherMarker = "その他: ";
+
+  getAllMistakeEntries().forEach(e => {
+    MISTAKE_CATEGORIES.forEach(category => {
+      if (e.mistake.includes(category)) {
+        categoryCounts[category] += 1;
+      }
+    });
+
+    const otherIndex = e.mistake.indexOf(otherMarker);
+    if (otherIndex !== -1) {
+      freeTextEntries.push({
+        chapterRef: e.chapterRef,
+        number: e.number,
+        date: e.date,
+        text: e.mistake.slice(otherIndex + otherMarker.length),
+      });
+    }
+  });
+
+  const categoryRanking = MISTAKE_CATEGORIES.map(category => ({ category, count: categoryCounts[category] })).sort(
+    (a, b) => b.count - a.count
+  );
+  freeTextEntries.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  return { categoryRanking, freeTextEntries };
+}
+
+// 単元別ミスランキング・ミス問題ランキング共通のHTML組み立て（上位を大きく、残りは詳細表示に）
+function renderMistakeRankingBlock({ ranking, idPrefix, topCount, detailCount, renderCard, renderRow, emptyMessage }) {
+  if (ranking.length === 0) {
+    return `<p class="mistake-empty">${emptyMessage}</p>`;
+  }
+
+  const medals = ["🥇", "🥈", "🥉"];
+  const top = ranking.slice(0, topCount);
+  const detail = ranking.slice(0, detailCount);
+  const detailId = `${idPrefix}-detail`;
+  const arrowId = `${idPrefix}-arrow`;
+
+  const topHtml = top
+    .map(
+      (item, i) => `
+        <div class="mistake-rank-card">
+          <div class="mistake-rank-medal">${medals[i] || `${i + 1}位`}</div>
+          ${renderCard(item)}
+        </div>
+      `
+    )
+    .join("");
+
+  const detailHtml = detail
+    .map(
+      (item, i) => `
+        <div class="mistake-rank-row">
+          <span class="mistake-rank-row-number">${i + 1}位</span>
+          ${renderRow(item)}
+        </div>
+      `
+    )
+    .join("");
+
+  const hasMore = ranking.length > topCount;
+
+  return `
+    <div class="mistake-top3">${topHtml}</div>
+    ${
+      hasMore
+        ? `
+      <button type="button" class="mistake-detail-toggle" onclick="toggleMistakeDetail('${detailId}', '${arrowId}')">
+        詳細を見る <span id="${arrowId}">▼</span>
+      </button>
+      <div class="mistake-detail-list" id="${detailId}" style="display: none;">${detailHtml}</div>
+    `
+        : ""
+    }
+  `;
+}
+
+function toggleMistakeDetail(detailId, arrowId) {
+  const box = document.getElementById(detailId);
+  const arrow = document.getElementById(arrowId);
+  if (!box) return;
+  const isOpen = box.style.display === "block";
+  box.style.display = isOpen ? "none" : "block";
+  if (arrow) arrow.textContent = isOpen ? "▼" : "▲";
+}
+
+function renderChapterMistakeRanking() {
+  const container = document.getElementById("mistake-chapter-ranking");
+  const ranking = getChapterMistakeRanking();
+  container.innerHTML = renderMistakeRankingBlock({
+    ranking,
+    idPrefix: "mistake-chapter",
+    topCount: 3,
+    detailCount: ranking.length,
+    renderCard: item => `
+      <div class="mistake-rank-title">${formatAchievementChapterTitleHtml(item.chapterRef)}</div>
+      <div class="mistake-rank-count">${item.count}回</div>
+    `,
+    renderRow: item => `
+      <span class="mistake-rank-row-title">${formatAchievementChapterTitle(item.chapterRef)}</span>
+      <span class="mistake-rank-row-count">${item.count}回</span>
+    `,
+    emptyMessage: "まだミスの記録がありません。",
+  });
+}
+
+function renderProblemMistakeRanking() {
+  const container = document.getElementById("mistake-problem-ranking");
+  const ranking = getProblemMistakeRanking();
+  container.innerHTML = renderMistakeRankingBlock({
+    ranking,
+    idPrefix: "mistake-problem",
+    topCount: 3,
+    detailCount: 10,
+    renderCard: item => `
+      <div class="mistake-rank-title">${formatAchievementChapterTitleHtml(item.chapterRef)}</div>
+      <div class="problem-number mistake-rank-badge">${item.number}</div>
+      <div class="mistake-rank-count">${item.count}回</div>
+    `,
+    renderRow: item => `
+      <span class="mistake-rank-row-chapter">
+        <span class="mistake-rank-row-title">${formatAchievementChapterTitle(item.chapterRef)}</span>
+        <span class="problem-number mistake-rank-row-badge">${item.number}</span>
+      </span>
+      <span class="mistake-rank-row-count">${item.count}回</span>
+    `,
+    emptyMessage: "2回以上ミスしたことがある問題は、まだありません。",
+  });
+}
+
+function renderMistakeBreakdownSection() {
+  const container = document.getElementById("mistake-breakdown");
+  const { categoryRanking, freeTextEntries } = getMistakeBreakdown();
+
+  if (getAllMistakeEntries().length === 0) {
+    container.innerHTML = `<p class="mistake-empty">まだミスの記録がありません。</p>`;
+    return;
+  }
+
+  const nonZero = categoryRanking.filter(c => c.count > 0);
+  const maxCount = Math.max(...nonZero.map(c => c.count), 1);
+  const barsHtml = nonZero
+    .map(
+      c => `
+        <div class="mistake-bar-row">
+          <div class="mistake-bar-label">${c.category}</div>
+          <div class="mistake-bar-track">
+            <div class="mistake-bar-fill" style="width: ${(c.count / maxCount) * 100}%;"></div>
+          </div>
+          <div class="mistake-bar-count">${c.count}回</div>
+        </div>
+      `
+    )
+    .join("");
+
+  const freeTextHtml =
+    freeTextEntries.length > 0
+      ? freeTextEntries
+          .map(
+            e => `
+              <div class="mistake-freetext-item">
+                <div class="mistake-freetext-meta">${formatAchievementChapterTitle(e.chapterRef)}　No.${e.number}・${formatDate(e.date)}</div>
+                <div class="mistake-freetext-text">${escapeAttr(e.text)}</div>
+              </div>
+            `
+          )
+          .join("")
+      : `<p class="mistake-empty">「その他」の自由記入のミスは、まだありません。</p>`;
+
+  container.innerHTML = `
+    ${barsHtml || `<p class="mistake-empty">定型のミス内容の記録は、まだありません。</p>`}
+    <p class="mistake-subheading">その他（自由記入）</p>
+    <div class="mistake-freetext-list">${freeTextHtml}</div>
+  `;
+}
+
+// ミス分析画面を表示する
+function showMistakeAnalysisScreen() {
+  hideAllScreens();
+  document.getElementById("mistake-analysis-screen").style.display = "block";
+  renderChapterMistakeRanking();
+  renderProblemMistakeRanking();
+  renderMistakeBreakdownSection();
+  window.scrollTo(0, 0);
+}
+
+// ===== 気づきノート =====
+
+const MISTAKE_NOTES_KEY = "mistakeNotes";
+const MISTAKE_NOTE_COLORS = ["yellow", "pink", "blue", "green"];
+const MISTAKE_NOTE_TILTS = ["tilt-1", "tilt-2", "tilt-3", "tilt-4"];
+
+function loadMistakeNotes() {
+  const raw = localStorage.getItem(MISTAKE_NOTES_KEY);
+  return raw ? JSON.parse(raw) : [];
+}
+
+function saveMistakeNotes(notes) {
+  localStorage.setItem(MISTAKE_NOTES_KEY, JSON.stringify(notes));
+}
+
+function showMistakeNotesScreen() {
+  hideAllScreens();
+  document.getElementById("mistake-notes-screen").style.display = "block";
+  renderMistakeNotesList();
+  window.scrollTo(0, 0);
+}
+
+// 気づきノートに新しい付箋を1枚追加する
+function addMistakeNote() {
+  const input = document.getElementById("mistake-note-input");
+  const text = input.value.trim();
+  if (!text) return;
+
+  const notes = loadMistakeNotes();
+  notes.push({
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    date: new Date().toISOString(),
+    text,
+  });
+  saveMistakeNotes(notes);
+  input.value = "";
+  renderMistakeNotesList();
+}
+
+function deleteMistakeNote(id) {
+  saveMistakeNotes(loadMistakeNotes().filter(n => n.id !== id));
+  renderMistakeNotesList();
+}
+
+// 付箋を1枚ずつ貼っていくイメージで、新しいものを上に・色と傾きを少しずつ変えて表示する
+function renderMistakeNotesList() {
+  const container = document.getElementById("mistake-notes-list");
+  const notes = loadMistakeNotes().slice().reverse();
+
+  if (notes.length === 0) {
+    container.innerHTML = `<p class="mistake-empty">まだ気づきの記録がありません。ミスを減らすために気づいたことを書いてみましょう。</p>`;
+    return;
+  }
+
+  container.innerHTML = notes
+    .map((note, i) => {
+      const color = MISTAKE_NOTE_COLORS[i % MISTAKE_NOTE_COLORS.length];
+      const tilt = MISTAKE_NOTE_TILTS[i % MISTAKE_NOTE_TILTS.length];
+      return `
+        <div class="mistake-note-card color-${color} ${tilt}">
+          <button type="button" class="mistake-note-delete" onclick="deleteMistakeNote('${note.id}')" aria-label="削除">✕</button>
+          <div class="mistake-note-date">${formatDate(note.date)}</div>
+          <div class="mistake-note-text">${escapeAttr(note.text)}</div>
+        </div>
+      `;
+    })
+    .join("");
 }
 
 // ===== 大テスト対策 =====
@@ -2120,6 +2454,8 @@ function showView(view) {
     "bigtest-random-screen": showBigTestScreen,
     "bigtest-checkpoint-screen": showBigTestScreen,
     "bigtest-calendar-screen": showBigTestScreen,
+    "mistake-analysis-screen": showCoverScreen,
+    "mistake-notes-screen": showMistakeAnalysisScreen,
   };
 
   function getSwipeBackHandler() {

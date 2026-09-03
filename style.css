@@ -1336,6 +1336,328 @@ button {
   flex-shrink: 0;
 }
 
+/* ===== ミス分析画面 ===== */
+
+.mistake-section {
+  background: #1b2536;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.mistake-section-title {
+  font-size: 15px;
+  font-weight: 900;
+  color: #f8fafc;
+  margin: 0 0 4px;
+}
+
+.mistake-section-desc {
+  font-size: 11px;
+  color: #7f8ba3;
+  margin: 0 0 10px;
+}
+
+.mistake-empty {
+  font-size: 12px;
+  color: #7f8ba3;
+  text-align: center;
+  padding: 10px 0;
+}
+
+.mistake-top3 {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.mistake-rank-card {
+  flex: 1;
+  min-width: 0;
+  background: #202b3f;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 10px;
+  padding: 10px 6px;
+  text-align: center;
+}
+
+.mistake-rank-medal {
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+.mistake-rank-title {
+  font-size: 11px;
+  line-height: 1.4;
+  color: #dbe4f3;
+  margin-bottom: 6px;
+}
+
+.mistake-rank-badge {
+  width: 22px;
+  height: 22px;
+  font-size: 12px;
+  border-width: 1.5px;
+  margin-bottom: 6px;
+}
+
+.mistake-rank-count {
+  font-size: 14px;
+  font-weight: 900;
+  color: #f87171;
+}
+
+.mistake-detail-toggle {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  color: #7fb0ff;
+  font-size: 11px;
+  padding: 6px 0;
+  cursor: pointer;
+  text-align: center;
+}
+
+.mistake-detail-list {
+  margin-top: 6px;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+  padding-top: 6px;
+}
+
+.mistake-rank-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+.mistake-rank-row-number {
+  flex-shrink: 0;
+  width: 30px;
+  color: #7f8ba3;
+}
+
+.mistake-rank-row-title {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.mistake-rank-row-chapter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.mistake-rank-row-badge {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  font-size: 10px;
+  border-width: 1.5px;
+}
+
+.mistake-rank-row-count {
+  flex-shrink: 0;
+  font-weight: 700;
+  color: #f87171;
+}
+
+.mistake-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.mistake-bar-label {
+  flex-shrink: 0;
+  width: 96px;
+  font-size: 10.5px;
+  color: #cbd5e1;
+  overflow-wrap: break-word;
+}
+
+.mistake-bar-track {
+  flex: 1;
+  min-width: 0;
+  height: 10px;
+  border-radius: 999px;
+  background: #253044;
+  overflow: hidden;
+}
+
+.mistake-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #f97316, #fb923c);
+}
+
+.mistake-bar-count {
+  flex-shrink: 0;
+  width: 32px;
+  text-align: right;
+  font-size: 11px;
+  font-weight: 700;
+  color: #dbe4f3;
+}
+
+.mistake-subheading {
+  font-size: 12px;
+  font-weight: 700;
+  color: #7fb0ff;
+  margin: 14px 0 8px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.mistake-freetext-item {
+  background: #202b3f;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+}
+
+.mistake-freetext-meta {
+  font-size: 10px;
+  color: #7f8ba3;
+  margin-bottom: 3px;
+}
+
+.mistake-freetext-text {
+  font-size: 12px;
+  color: #dbe4f3;
+}
+
+/* ===== 気づきノート画面 ===== */
+
+.mistake-note-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.mistake-note-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #37415a;
+  background: #0d1420;
+  color: #f1f5f9;
+  font-family: inherit;
+  font-size: 13px;
+  resize: vertical;
+}
+
+.mistake-note-add-btn {
+  align-self: flex-end;
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: none;
+  background-color: #3b82f6;
+  color: white;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mistake-notes-list {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 付箋が1枚ずつ貼られていくイメージ：淡い色紙＋わずかな傾き＋影で、紙が貼られたような見た目にする */
+.mistake-note-card {
+  position: relative;
+  color: #292524;
+  padding: 14px 30px 14px 16px;
+  border-radius: 2px;
+  margin-bottom: 16px;
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.3);
+  animation: mistakeNoteIn 0.25s ease;
+}
+
+@keyframes mistakeNoteIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mistake-note-card {
+    animation: none;
+  }
+}
+
+.mistake-note-card.color-yellow {
+  background: #fde68a;
+}
+
+.mistake-note-card.color-pink {
+  background: #fbcfe8;
+}
+
+.mistake-note-card.color-blue {
+  background: #bfdbfe;
+}
+
+.mistake-note-card.color-green {
+  background: #bbf7d0;
+}
+
+.mistake-note-card.tilt-1 {
+  transform: rotate(-1.6deg);
+}
+
+.mistake-note-card.tilt-2 {
+  transform: rotate(1.3deg);
+}
+
+.mistake-note-card.tilt-3 {
+  transform: rotate(-0.9deg);
+}
+
+.mistake-note-card.tilt-4 {
+  transform: rotate(1.7deg);
+}
+
+.mistake-note-date {
+  font-size: 10px;
+  color: #57534e;
+  margin-bottom: 4px;
+  font-weight: 700;
+}
+
+.mistake-note-text {
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.mistake-note-delete {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  background: none;
+  border: none;
+  color: rgba(41, 37, 36, 0.45);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
 /* ===== 大テスト対策画面 ===== */
 
 .bigtest-content {
