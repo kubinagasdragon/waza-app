@@ -1,6 +1,14 @@
 // アプリの更新履歴（コミット・プッシュのたびに先頭に新しいバージョンを追加する）
 const CHANGELOG = [
   {
+    version: "1.0.20",
+    date: "2026-09-02",
+    changes: [
+      "「大テスト対策」に「未演習問題一覧 📋」を追加。その学期の対象問題のうち、まだ一度も演習していない問題を一覧表示し、その場で自己評価をつけられる（評価をつけると一覧から自動的に外れる）",
+      "使い方ガイドラインに「未演習問題一覧」の説明を追加",
+    ],
+  },
+  {
     version: "1.0.19",
     date: "2026-09-02",
     changes: [
@@ -365,6 +373,7 @@ const ALL_SCREEN_IDS = [
   "bigtest-random-screen",
   "bigtest-checkpoint-screen",
   "bigtest-calendar-screen",
+  "bigtest-unpracticed-screen",
   "mistake-analysis-screen",
   "mistake-notes-screen",
 ];
@@ -1435,6 +1444,82 @@ function renderBigTestCheckpointList() {
   });
 }
 
+// ===== 未演習問題一覧 =====
+
+// その学期の対象問題のうち、まだ一度も演習していない問題を、ⅠA→ⅡB章順・問題番号順で返す
+function getBigTestUnpracticedProblems(termKey) {
+  const records = loadRecords();
+  return getBigTestEligibleProblemsForTerm(termKey)
+    .filter(p => {
+      const history = records[`${p.chapterRef}_${p.number}`] || [];
+      return history.length === 0;
+    })
+    .sort((a, b) => compareChapterRef(a.chapterRef, b.chapterRef) || a.number - b.number);
+}
+
+function showBigTestUnpracticedScreen() {
+  hideAllScreens();
+  document.getElementById("bigtest-unpracticed-screen").style.display = "block";
+  renderBigTestUnpracticedList();
+  window.scrollTo(0, 0);
+}
+
+// 未演習問題一覧を描画する。評価をつけると「未演習」ではなくなるため、次の再描画で自動的に一覧から消える
+function renderBigTestUnpracticedList() {
+  const container = document.getElementById("bigtest-unpracticed-list");
+  const meta = document.getElementById("bigtest-unpracticed-meta");
+  const problems = getBigTestUnpracticedProblems(currentBigTestTerm);
+
+  meta.textContent = `${BIGTEST_TERM_LABELS[currentBigTestTerm]}・${problems.length}問`;
+
+  if (problems.length === 0) {
+    container.innerHTML = "<p>未演習の問題はありません。すべて演習済みです🎉</p>";
+    return;
+  }
+
+  container.innerHTML = "";
+  problems.forEach(p => {
+    const problemData = problemBank[p.chapterRef].problems.find(pp => pp.number === p.number);
+    if (!problemData) return; // データが変わっていた場合は安全にスキップ
+
+    const problem = { chapterRef: p.chapterRef, number: problemData.number, level: problemData.level, checkPoint: problemData.checkPoint };
+    const key = recordKey(problem);
+    const chapterLabel = formatAchievementChapterTitle(p.chapterRef);
+    const checkpointBoxId = "bigtest-unpracticed-checkpoint-" + key;
+
+    const evalButtons = ["A", "B", "C", "D", "E"]
+      .map(
+        e =>
+          `<button class="eval-btn eval-${e}" onclick="handleBigTestUnpracticedEvaluationClick('${p.chapterRef}', ${p.number}, '${e}')">${e}</button>`
+      )
+      .join("");
+
+    const item = document.createElement("div");
+    item.className = "problem-item";
+    item.innerHTML = `
+      <div class="problem-header">
+        <span class="bigtest-chapter-label">${chapterLabel}</span>
+        <span class="problem-number">${problem.number}</span>
+        <span class="problem-level">Lv${problem.level}</span>
+      </div>
+      <div class="eval-buttons">${evalButtons}</div>
+      <button class="checkpoint-toggle" onclick="toggleCheckpointBox('${checkpointBoxId}')">💡 Check Point！</button>
+      <div id="${checkpointBoxId}" class="checkpoint">${problem.checkPoint}</div>
+    `;
+    container.appendChild(item);
+  });
+}
+
+// 未演習問題一覧画面での評価ボタンの処理
+function handleBigTestUnpracticedEvaluationClick(chapterRef, number, evaluation) {
+  const problem = { chapterRef, number };
+  if (evaluation === "B") {
+    openMistakeModal(problem);
+    return;
+  }
+  saveEvaluation(problem, evaluation, null);
+}
+
 // ===== 学習カレンダー =====
 
 const WEEKDAY_NAMES = ["日", "月", "火", "水", "木", "金", "土"];
@@ -2108,10 +2193,12 @@ function saveEvaluation(problem, evaluation, mistake) {
   });
   saveRecords(records);
 
-  // 評価をつけた画面（メイン演習画面／大テスト対策のランダム演習画面）に応じて再描画する
+  // 評価をつけた画面（メイン演習画面／大テスト対策のランダム演習・未演習問題一覧画面）に応じて再描画する
   // ※CheckPointおさらい画面は評価不可（記録の閲覧のみ）のため、ここでは再描画しない
   if (document.getElementById("bigtest-random-screen").style.display !== "none") {
     renderBigTestRandomList();
+  } else if (document.getElementById("bigtest-unpracticed-screen").style.display !== "none") {
+    renderBigTestUnpracticedList();
   } else {
     renderProblems();
   }
@@ -2473,6 +2560,7 @@ function showView(view) {
     "bigtest-random-screen": showBigTestScreen,
     "bigtest-checkpoint-screen": showBigTestScreen,
     "bigtest-calendar-screen": showBigTestScreen,
+    "bigtest-unpracticed-screen": showBigTestScreen,
     "mistake-analysis-screen": showCoverScreen,
     "mistake-notes-screen": showMistakeAnalysisScreen,
   };
