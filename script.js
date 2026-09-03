@@ -1,6 +1,15 @@
 // アプリの更新履歴（コミット・プッシュのたびに先頭に新しいバージョンを追加する）
 const CHANGELOG = [
   {
+    version: "1.0.19",
+    date: "2026-09-02",
+    changes: [
+      "演習画面のタブに「B評価のみ」を追加（最新の自己評価がBの問題だけを表示）",
+      "タブの並びを「すべての問題」「提出必須のみ(SS/SA)・提出必須のみ(SBC/T)」「要復習のみ・未演習のみ・B評価のみ」「ミス一覧・Check Point一覧」の4段に整理",
+      "使い方ガイドラインに「B評価のみ」の説明を追加",
+    ],
+  },
+  {
     version: "1.0.18",
     date: "2026-09-02",
     changes: [
@@ -311,9 +320,9 @@ function needsReview(history) {
   return flagged;
 }
 
-// 現在の表示フィルタ（'all' / 'homeworkSSSA' / 'homeworkSBCT' / 'review' / 'unpracticed'）
+// 現在の表示フィルタ（'all' / 'homeworkSSSA' / 'homeworkSBCT' / 'review' / 'unpracticed' / 'bOnly'）
 let currentFilter = "all";
-// 現在表示中のタブ（フィルタ4種 + 'mistakes' + 'checkpoints'）。単元切り替え時の再描画に使う
+// 現在表示中のタブ（フィルタ5種 + 'mistakes' + 'checkpoints'）。単元切り替え時の再描画に使う
 let currentView = "all";
 
 // 単元（章・講）を切り替える
@@ -2252,6 +2261,7 @@ function getFilteredProblems() {
       if (currentFilter === "homeworkSBCT") return problem.homeworkRequiredSBCT;
       if (currentFilter === "review") return needsReview(history);
       if (currentFilter === "unpracticed") return history.length === 0;
+      if (currentFilter === "bOnly") return history.length > 0 && history[history.length - 1].evaluation === "B";
       return true; // 'all'
     });
 }
@@ -2428,7 +2438,7 @@ function showView(view) {
     renderCheckpoints();
   } else {
     problemList.style.display = "block";
-    currentFilter = view; // 'all' / 'homeworkSSSA' / 'homeworkSBCT' / 'review' / 'unpracticed'
+    currentFilter = view; // 'all' / 'homeworkSSSA' / 'homeworkSBCT' / 'review' / 'unpracticed' / 'bOnly'
     renderProblems();
   }
 }
