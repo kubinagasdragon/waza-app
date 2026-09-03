@@ -1,6 +1,14 @@
 // アプリの更新履歴（コミット・プッシュのたびに先頭に新しいバージョンを追加する）
 const CHANGELOG = [
   {
+    version: "1.0.18",
+    date: "2026-09-02",
+    changes: [
+      "「'26 大テスト対策」の名称を「大テスト対策」に、「学習カレンダー」の名称を「2026年度 学習カレンダー」に変更",
+      "全分野弱点ランダム演習・全分野CheckPointおさらいの「1学期・5問」表示の文字を大きく強調。学習カレンダーにも同じスタイルで学期表示を追加",
+    ],
+  },
+  {
     version: "1.0.17",
     date: "2026-09-02",
     changes: [
@@ -1564,6 +1572,7 @@ function getBigTestMonthRange(termKey) {
 function showBigTestCalendarScreen() {
   hideAllScreens();
   document.getElementById("bigtest-calendar-screen").style.display = "block";
+  document.getElementById("bigtest-calendar-term-label").textContent = BIGTEST_TERM_LABELS[currentBigTestTerm];
 
   const range = getBigTestMonthRange(currentBigTestTerm);
   const base = range ? new Date(range.minYear, range.minMonth, 1) : new Date();

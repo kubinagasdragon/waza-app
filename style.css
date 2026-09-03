@@ -1681,6 +1681,13 @@ button {
   min-height: 14px;
 }
 
+/* 「1学期・5問」のような、今どの学期・条件を見ているかの表示を目立たせる */
+.bigtest-meta-highlight {
+  font-size: 15px;
+  font-weight: 700;
+  color: #dbe4f3;
+}
+
 .bigtest-section {
   background: #1b2536;
   border-radius: 10px;
