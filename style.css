@@ -1344,6 +1344,49 @@ button {
   flex-shrink: 0;
 }
 
+/* ===== 未演習問題一覧（章ごとのアコーディオン） ===== */
+
+.unpracticed-chapter-group {
+  margin-bottom: 10px;
+}
+
+.unpracticed-chapter-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  background: #1b2536;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.unpracticed-chapter-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  color: #dbe4f3;
+  overflow-wrap: break-word;
+}
+
+.unpracticed-chapter-count {
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #7fb0ff;
+}
+
+.unpracticed-chapter-arrow {
+  flex-shrink: 0;
+  font-size: 10px;
+  color: #7f8ba3;
+}
+
+.unpracticed-chapter-body {
+  margin-top: 8px;
+  padding-left: 4px;
+}
+
 /* ===== ミス分析画面 ===== */
 
 .mistake-section {
@@ -1833,6 +1876,14 @@ button {
   color: #f1f5f9;
   font-family: inherit;
   font-size: 13px;
+}
+
+.calendar-countdown {
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: #f87171;
+  margin: 0 0 14px;
 }
 
 .calendar-usage-note {

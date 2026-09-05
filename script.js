@@ -1,6 +1,16 @@
 // アプリの更新履歴（コミット・プッシュのたびに先頭に新しいバージョンを追加する）
 const CHANGELOG = [
   {
+    version: "1.0.21",
+    date: "2026-09-03",
+    changes: [
+      "学習カレンダーに「大テストまであと…◯日」を追加（現在進行中の学期を見ているときだけ赤字で表示）",
+      "同じ定型ミス内容が3回・6回…と重なると、気づきノートへの記入をポップアップでお知らせする機能を追加",
+      "未演習問題一覧を、章ごとの未演習数を並べてタップで開くアコーディオン形式に変更",
+      "使い方ガイドラインの学習到達度チェッカー・大テスト対策・ミス分析の説明文を整理・簡潔化",
+    ],
+  },
+  {
     version: "1.0.20",
     date: "2026-09-02",
     changes: [
@@ -1457,14 +1467,20 @@ function getBigTestUnpracticedProblems(termKey) {
     .sort((a, b) => compareChapterRef(a.chapterRef, b.chapterRef) || a.number - b.number);
 }
 
+// 現在開いている章（チャプター）の集合。画面に入り直すとリセットされるが、
+// 問題を評価して一覧が再描画されても、開いた章は閉じ直さずそのまま続けて演習できるようにする
+let bigTestUnpracticedExpandedChapters = new Set();
+
 function showBigTestUnpracticedScreen() {
   hideAllScreens();
   document.getElementById("bigtest-unpracticed-screen").style.display = "block";
+  bigTestUnpracticedExpandedChapters = new Set();
   renderBigTestUnpracticedList();
   window.scrollTo(0, 0);
 }
 
-// 未演習問題一覧を描画する。評価をつけると「未演習」ではなくなるため、次の再描画で自動的に一覧から消える
+// 未演習問題を章ごとにグループ化して描画する。まず章タイトルと未演習数だけを並べ、
+// タップするとその章の未演習問題（自己評価つき）が開く。評価をつけると一覧から自動的に消える
 function renderBigTestUnpracticedList() {
   const container = document.getElementById("bigtest-unpracticed-list");
   const meta = document.getElementById("bigtest-unpracticed-meta");
@@ -1477,37 +1493,75 @@ function renderBigTestUnpracticedList() {
     return;
   }
 
-  container.innerHTML = "";
+  // 既にⅠA→ⅡB章順・問題番号順に並んでいるので、隣接する同じ章をまとめるだけでよい
+  const groups = [];
   problems.forEach(p => {
-    const problemData = problemBank[p.chapterRef].problems.find(pp => pp.number === p.number);
-    if (!problemData) return; // データが変わっていた場合は安全にスキップ
-
-    const problem = { chapterRef: p.chapterRef, number: problemData.number, level: problemData.level, checkPoint: problemData.checkPoint };
-    const key = recordKey(problem);
-    const chapterLabel = formatAchievementChapterTitle(p.chapterRef);
-    const checkpointBoxId = "bigtest-unpracticed-checkpoint-" + key;
-
-    const evalButtons = ["A", "B", "C", "D", "E"]
-      .map(
-        e =>
-          `<button class="eval-btn eval-${e}" onclick="handleBigTestUnpracticedEvaluationClick('${p.chapterRef}', ${p.number}, '${e}')">${e}</button>`
-      )
-      .join("");
-
-    const item = document.createElement("div");
-    item.className = "problem-item";
-    item.innerHTML = `
-      <div class="problem-header">
-        <span class="bigtest-chapter-label">${chapterLabel}</span>
-        <span class="problem-number">${problem.number}</span>
-        <span class="problem-level">Lv${problem.level}</span>
-      </div>
-      <div class="eval-buttons">${evalButtons}</div>
-      <button class="checkpoint-toggle" onclick="toggleCheckpointBox('${checkpointBoxId}')">💡 Check Point！</button>
-      <div id="${checkpointBoxId}" class="checkpoint">${problem.checkPoint}</div>
-    `;
-    container.appendChild(item);
+    const last = groups[groups.length - 1];
+    if (last && last.chapterRef === p.chapterRef) {
+      last.problems.push(p);
+    } else {
+      groups.push({ chapterRef: p.chapterRef, problems: [p] });
+    }
   });
+
+  container.innerHTML = "";
+  groups.forEach(group => {
+    const chapterLabel = formatAchievementChapterTitle(group.chapterRef);
+    const isOpen = bigTestUnpracticedExpandedChapters.has(group.chapterRef);
+    const bodyId = `bigtest-unpracticed-body-${group.chapterRef}`;
+
+    const wrap = document.createElement("div");
+    wrap.className = "unpracticed-chapter-group";
+    wrap.innerHTML = `
+      <div class="unpracticed-chapter-header" onclick="toggleUnpracticedChapter('${group.chapterRef}')">
+        <span class="unpracticed-chapter-title">${chapterLabel}</span>
+        <span class="unpracticed-chapter-count">${group.problems.length}問</span>
+        <span class="unpracticed-chapter-arrow">${isOpen ? "▲" : "▼"}</span>
+      </div>
+      <div class="unpracticed-chapter-body" id="${bodyId}" style="display: ${isOpen ? "block" : "none"};"></div>
+    `;
+    container.appendChild(wrap);
+
+    const body = wrap.querySelector(`#${bodyId}`);
+    group.problems.forEach(p => {
+      const problemData = problemBank[p.chapterRef].problems.find(pp => pp.number === p.number);
+      if (!problemData) return; // データが変わっていた場合は安全にスキップ
+
+      const problem = { chapterRef: p.chapterRef, number: problemData.number, level: problemData.level, checkPoint: problemData.checkPoint };
+      const key = recordKey(problem);
+      const checkpointBoxId = "bigtest-unpracticed-checkpoint-" + key;
+
+      const evalButtons = ["A", "B", "C", "D", "E"]
+        .map(
+          e =>
+            `<button class="eval-btn eval-${e}" onclick="handleBigTestUnpracticedEvaluationClick('${p.chapterRef}', ${p.number}, '${e}')">${e}</button>`
+        )
+        .join("");
+
+      const item = document.createElement("div");
+      item.className = "problem-item";
+      item.innerHTML = `
+        <div class="problem-header">
+          <span class="problem-number">${problem.number}</span>
+          <span class="problem-level">Lv${problem.level}</span>
+        </div>
+        <div class="eval-buttons">${evalButtons}</div>
+        <button class="checkpoint-toggle" onclick="toggleCheckpointBox('${checkpointBoxId}')">💡 Check Point！</button>
+        <div id="${checkpointBoxId}" class="checkpoint">${problem.checkPoint}</div>
+      `;
+      body.appendChild(item);
+    });
+  });
+}
+
+// 章の開閉を切り替える（開閉状態はrenderBigTestUnpracticedListの再描画をまたいで保持される）
+function toggleUnpracticedChapter(chapterRef) {
+  if (bigTestUnpracticedExpandedChapters.has(chapterRef)) {
+    bigTestUnpracticedExpandedChapters.delete(chapterRef);
+  } else {
+    bigTestUnpracticedExpandedChapters.add(chapterRef);
+  }
+  renderBigTestUnpracticedList();
 }
 
 // 未演習問題一覧画面での評価ボタンの処理
@@ -1660,6 +1714,44 @@ function getBigTestMonthRange(termKey) {
     minYear: minDate.getFullYear(),
     minMonth: minDate.getMonth(),
   };
+}
+
+// 大テストまでの残り日数を計算する。今日がその学期の期間（最初の講義日〜大テスト当日）に
+// 入っていない場合（その学期がまだ始まっていない・もう大テストが終わっている等）はnullを返す
+function getBigTestCountdownDays(termKey) {
+  const weekday = loadBigTestWeekday();
+  const overrides = loadBigTestOverrides();
+  const weeks = getBigTestWeeksForTerm(termKey).filter(week => week.content);
+  if (weeks.length === 0) return null;
+
+  const testWeek = weeks.find(week => week.content.includes("大テスト"));
+  if (!testWeek) return null;
+
+  const dates = weeks.map(week => resolveDisplayDate(week, weekday, overrides));
+  const firstDate = dates.reduce((a, b) => (b < a ? b : a));
+  const testDate = resolveDisplayDate(testWeek, weekday, overrides);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  firstDate.setHours(0, 0, 0, 0);
+  testDate.setHours(0, 0, 0, 0);
+
+  if (today < firstDate || today > testDate) return null;
+
+  return Math.round((testDate - today) / (1000 * 60 * 60 * 24));
+}
+
+// カレンダー画面の「大テストまであと◯日」表示を更新する
+function renderBigTestCountdown() {
+  const el = document.getElementById("calendar-countdown");
+  const days = getBigTestCountdownDays(currentBigTestTerm);
+
+  if (days === null) {
+    el.style.display = "none";
+    return;
+  }
+  el.textContent = days === 0 ? "今日が大テスト！" : `大テストまであと…${days}日`;
+  el.style.display = "block";
 }
 
 // 学習カレンダー画面を表示する（現在選択中の学期＝currentBigTestTermの期間を表示する）
@@ -1845,6 +1937,7 @@ function computeBigTestPracticePeriods(weeks, weekday, overrides) {
 // 月間カレンダーのグリッドを描画する
 function renderBigTestCalendar() {
   renderBigTestWeekdayPresets();
+  renderBigTestCountdown();
   document.getElementById("calendar-month-label").textContent = `${currentCalendarYear}年${currentCalendarMonth + 1}月`;
 
   const weekday = loadBigTestWeekday();
@@ -2320,6 +2413,44 @@ function confirmMistakeModal() {
 
   saveEvaluation(pendingMistakeProblem, "B", mistake);
   closeMistakeModal();
+  maybePromptMistakeNote(mistake);
+}
+
+// ===== ミス分析 → 気づきノートへの軽い連携 =====
+// 同じ定型ミス内容が3回・6回・9回…と積み重なるたびに、気づきノートへの記入をさりげなく促す
+const MISTAKE_NOTE_PROMPT_THRESHOLD = 3;
+let pendingMistakeNotePromptCategory = null;
+
+function maybePromptMistakeNote(mistakeText) {
+  if (!mistakeText) return;
+
+  const { categoryRanking } = getMistakeBreakdown();
+  const hitCategory = categoryRanking.find(
+    c => mistakeText.includes(c.category) && c.count > 0 && c.count % MISTAKE_NOTE_PROMPT_THRESHOLD === 0
+  );
+  if (!hitCategory) return;
+
+  pendingMistakeNotePromptCategory = hitCategory.category;
+  document.getElementById("mistake-note-prompt-text").textContent =
+    `「${hitCategory.category}」のミスがこれで${hitCategory.count}回目です。気づいたことを気づきノートに書き残しておきましょう。`;
+  document.getElementById("mistake-note-prompt-modal").style.display = "flex";
+}
+
+function closeMistakeNotePrompt() {
+  document.getElementById("mistake-note-prompt-modal").style.display = "none";
+  pendingMistakeNotePromptCategory = null;
+}
+
+function goToMistakeNoteFromPrompt() {
+  const category = pendingMistakeNotePromptCategory;
+  closeMistakeNotePrompt();
+  showMistakeNotesScreen();
+  const input = document.getElementById("mistake-note-input");
+  if (input && category) {
+    input.value = `${category}のミスが続いており、対策としては、`;
+    input.focus();
+    input.setSelectionRange(input.value.length, input.value.length); // カーソルを文末に置き、続きをすぐ書けるようにする
+  }
 }
 
 // Check Pointの表示・非表示切り替え（idを直接指定する。同じ問題が複数の画面に出ても衝突しないように）
@@ -2544,10 +2675,12 @@ function showView(view) {
     const mistakeModal = document.getElementById("mistake-modal");
     const changelogModal = document.getElementById("changelog-modal");
     const calendarDayModal = document.getElementById("calendar-day-modal");
+    const mistakeNotePromptModal = document.getElementById("mistake-note-prompt-modal");
     return (
       mistakeModal.style.display === "flex" ||
       changelogModal.style.display === "flex" ||
-      calendarDayModal.style.display === "flex"
+      calendarDayModal.style.display === "flex" ||
+      mistakeNotePromptModal.style.display === "flex"
     );
   }
 
