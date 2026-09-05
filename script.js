@@ -1,6 +1,13 @@
 // アプリの更新履歴（コミット・プッシュのたびに先頭に新しいバージョンを追加する）
 const CHANGELOG = [
   {
+    version: "1.0.22",
+    date: "2026-09-05",
+    changes: [
+      "学習カレンダーで、推奨の復習枠（Lv.1-2／Lv.1-3）が設定されていない週でも、自由記載できる空欄を表示するように変更",
+    ],
+  },
+  {
     version: "1.0.21",
     date: "2026-09-03",
     changes: [
@@ -2114,15 +2121,19 @@ function openCalendarDayModal(dateKey) {
   document.getElementById("calendar-day-modal-title").textContent = formatLectureLabel(week, lectureNumbers[week.weekStart]);
 
   const isTestWeek = week.content && week.content.includes("大テスト");
+  const isRegularLectureWeek = !isTestWeek && !!week.content;
 
-  const extra1Value = override.extra1Override != null ? override.extra1Override : week.extra1;
-  const extra2Value = override.extra2Override != null ? override.extra2Override : week.extra2;
+  // 推奨の枠（week.extra1/extra2）が無い週でも、自由記載できる空欄を出す（推奨バッジは無い場合のみ非表示）
+  const extra1Value = override.extra1Override != null ? override.extra1Override : week.extra1 || "";
+  const extra2Value = override.extra2Override != null ? override.extra2Override : week.extra2 || "";
+  const extra1ShowBadge = week.extra1 && (override.extra1Override == null || override.extra1Override === "");
+  const extra2ShowBadge = week.extra2 && (override.extra2Override == null || override.extra2Override === "");
 
   const reviewChapterLabel = resolveTopicChapterLabel(week.review);
   const extra1ChapterLabel = resolveTopicChapterLabel(week.extra1);
   const extra2ChapterLabel = resolveTopicChapterLabel(week.extra2);
 
-  const hasTasks = isTestWeek || week.review || week.extra1 || week.extra2;
+  const hasTasks = isTestWeek || isRegularLectureWeek;
 
   const body = document.getElementById("calendar-day-modal-body");
   body.innerHTML = `
@@ -2132,20 +2143,18 @@ function openCalendarDayModal(dateKey) {
     <p class="calendar-modal-test-message">特になし。大テストまでに全力を注いだら、その後は少しだけ休みましょう。</p>
     ` : `
     ${week.review ? `<p class="calendar-modal-line">講義内容の復習：${week.review}${reviewChapterLabel ? ` (${reviewChapterLabel})` : ""} ${plan.reviewTag}</p>` : ""}
-    ${week.extra1 ? `
+    ${isRegularLectureWeek ? `
       <div class="calendar-modal-edit-row">
-        <label class="calendar-modal-field-label">🔁（${plan.extra1Tag}復習）${(override.extra1Override == null || override.extra1Override === "") ? `<span class="calendar-modal-recommend-badge" data-recommend="${escapeAttr(week.extra1)}" onclick="restoreCalendarModalRecommend('calendar-modal-extra1', this)">推奨：${week.extra1}${extra1ChapterLabel ? ` (${extra1ChapterLabel})` : ""}</span>` : ""}</label>
+        <label class="calendar-modal-field-label">🔁（${plan.extra1Tag}復習）${extra1ShowBadge ? `<span class="calendar-modal-recommend-badge" data-recommend="${escapeAttr(week.extra1)}" onclick="restoreCalendarModalRecommend('calendar-modal-extra1', this)">推奨：${week.extra1}${extra1ChapterLabel ? ` (${extra1ChapterLabel})` : ""}</span>` : ""}</label>
         <div class="calendar-modal-input-row">
-          <input type="text" id="calendar-modal-extra1" class="calendar-modal-text-input" value="${escapeAttr(extra1Value)}">
+          <input type="text" id="calendar-modal-extra1" class="calendar-modal-text-input" value="${escapeAttr(extra1Value)}" placeholder="自由に記載できます">
           <button type="button" class="calendar-modal-clear-btn" onclick="clearCalendarModalInput('calendar-modal-extra1')" aria-label="消去">✕</button>
         </div>
       </div>
-    ` : ""}
-    ${week.extra2 ? `
       <div class="calendar-modal-edit-row">
-        <label class="calendar-modal-field-label">🔁（${plan.extra2Tag}復習）${(override.extra2Override == null || override.extra2Override === "") ? `<span class="calendar-modal-recommend-badge" data-recommend="${escapeAttr(week.extra2)}" onclick="restoreCalendarModalRecommend('calendar-modal-extra2', this)">推奨：${week.extra2}${extra2ChapterLabel ? ` (${extra2ChapterLabel})` : ""}</span>` : ""}</label>
+        <label class="calendar-modal-field-label">🔁（${plan.extra2Tag}復習）${extra2ShowBadge ? `<span class="calendar-modal-recommend-badge" data-recommend="${escapeAttr(week.extra2)}" onclick="restoreCalendarModalRecommend('calendar-modal-extra2', this)">推奨：${week.extra2}${extra2ChapterLabel ? ` (${extra2ChapterLabel})` : ""}</span>` : ""}</label>
         <div class="calendar-modal-input-row">
-          <input type="text" id="calendar-modal-extra2" class="calendar-modal-text-input" value="${escapeAttr(extra2Value)}">
+          <input type="text" id="calendar-modal-extra2" class="calendar-modal-text-input" value="${escapeAttr(extra2Value)}" placeholder="自由に記載できます">
           <button type="button" class="calendar-modal-clear-btn" onclick="clearCalendarModalInput('calendar-modal-extra2')" aria-label="消去">✕</button>
         </div>
       </div>
